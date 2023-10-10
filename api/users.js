@@ -3,8 +3,8 @@ const jwt = require("jsonwebtoken");
 const usersRouter = express.Router();
 const bcrypt = require("bcrypt");
 
-const { requireUser } = require("./utils");
-const { createUser, getUser, getUserByEmail } = require("../db");
+const { requireUser, requireAdmin } = require("./utils");
+const { getAllUsers, createUser, getUser, getUserByEmail } = require("../db");
 
 //user routes will go here
 
@@ -109,6 +109,44 @@ usersRouter.post("/login", async (req, res, next) => {
     next({
       name: "Login Error",
       message: "There was an error logging in.",
+    });
+  }
+});
+
+//GET All Users
+//GET /api/users/all_users
+
+usersRouter.get("/all_users", requireAdmin, async (req, res, next) => {
+  try {
+    const allUsers = await getAllUsers();
+
+    res.send({
+      success: true,
+      allUsers: allUsers,
+    });
+  } catch ({ name, message }) {
+    next({
+      name: "Error Getting All Users",
+      message: "There was an error getting all users.",
+    });
+  }
+});
+
+//GET User Profile
+//GET /api/users/me
+
+usersRouter.get("/me", requireUser, async (req, res, next) => {
+  try {
+    const user = await getUser(req.user.id);
+
+    res.send({
+      success: true,
+      user: user,
+    });
+  } catch ({ name, message }) {
+    next({
+      name: "Error Getting User",
+      message: "There was an error getting the user.",
     });
   }
 });

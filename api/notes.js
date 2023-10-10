@@ -1,7 +1,7 @@
 const express = require("express");
 const notesRouter = express.Router();
 
-const { requireUser } = require("./utils");
+const { requireUser, requireAdmin } = require("./utils");
 const {
   //Notes//
   getAllNotes,
@@ -31,7 +31,7 @@ const {
 //GET All Notes  ***needs Admin***
 //GET /api/notes/all_notes
 
-notesRouter.get("/all_notes", async (req, res, next) => {
+notesRouter.get("/all_notes", requireAdmin, async (req, res, next) => {
   try {
     const notes = await getAllNotes();
     if (!notes) {
@@ -194,7 +194,7 @@ notesRouter.patch(
 //GET All Items ***needs Admin***
 //GET "/api/notes/all_items"
 
-notesRouter.get("/all_items", async (req, res, next) => {
+notesRouter.get("/all_items", requireAdmin, async (req, res, next) => {
   try {
     const items = await getAllItems();
     if (!items) {
@@ -290,7 +290,7 @@ notesRouter.delete(
 //GET ALL Labels ***needs Admin***
 //GET "/api/notes/all_labels"
 
-notesRouter.get("/all_labels", async (req, res, next) => {
+notesRouter.get("/all_labels", requireAdmin, async (req, res, next) => {
   try {
     const labels = await getAllLabels();
     if (!labels) {

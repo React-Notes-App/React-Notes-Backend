@@ -3,6 +3,7 @@ const usersToAdd = [
     name: "John",
     email: "John@mymail.com",
     password: "password",
+    is_admin: true,
   },
   {
     name: "Jane",
