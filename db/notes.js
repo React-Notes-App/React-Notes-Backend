@@ -83,13 +83,14 @@ const getNotesByUser = async (id) => {
     const { rows } = await client.query(
       `
                 SELECT notes.*, 
-                array_agg(row_to_json(items.*))as items
+                array_agg(row_to_json(items.*))as items,
+                array_agg(row_to_json(labels.*))as labels
                 
                 FROM 
                 notes
                 LEFT OUTER JOIN items ON notes.id = items.notes_Id
                 LEFT OUTER JOIN labels ON notes.id = labels.notes_Id
-                WHERE notes.users_Id =$1
+                WHERE notes.users_Id =$1 AND notes.is_archived = false
                 GROUP BY notes.id;
             `,
       [id]
@@ -105,9 +106,9 @@ const getNotesByUser = async (id) => {
   }
 };
 
-const getNotesByLabel = async (name) => {
+const getArchivedNotesByUser = async (id) => {
   try {
-    console.log("Getting notes by label", name);
+    console.log("Getting archived notes by user", id);
     const { rows } = await client.query(
       `
                 SELECT notes.*, 
@@ -117,19 +118,61 @@ const getNotesByLabel = async (name) => {
                 notes
                 LEFT OUTER JOIN items ON notes.id = items.notes_Id
                 LEFT OUTER JOIN labels ON notes.id = labels.notes_Id
-                WHERE labels.label_name =$1
+                WHERE notes.users_Id =$1 AND notes.is_archived = true
                 GROUP BY notes.id;
-                
             `,
-      [name]
+      [id]
     );
     console.log(
-      "Finished getting notes by label",
+      "Finished getting archived notes by user",
       JSON.stringify(rows, null, 2)
     );
     return rows;
   } catch (error) {
-    console.error("Error getting notes by label");
+    console.error("Error getting archived notes by user");
+    throw error;
+  }
+};
+
+const deleteNote = async (noteId) => {
+  try {
+    console.log("Deleting note", noteId);
+    const {
+      rows: [note],
+    } = await client.query(
+      `
+                DELETE FROM notes
+                WHERE id=$1
+                RETURNING *;
+            `,
+      [noteId]
+    );
+    console.log("Finished deleting note", note);
+    return note;
+  } catch (error) {
+    console.error("Error deleting note");
+    throw error;
+  }
+};
+
+const archiveNote = async (noteId) => {
+  try {
+    console.log("Archiving note", noteId);
+    const {
+      rows: [note],
+    } = await client.query(
+      `
+                UPDATE notes
+                SET is_archived = true
+                WHERE id=$1
+                RETURNING *;
+            `,
+      [noteId]
+    );
+    console.log("Finished archiving note", note);
+    return note;
+  } catch (error) {
+    console.error("Error archiving note");
     throw error;
   }
 };
@@ -138,6 +181,8 @@ module.exports = {
   createNote,
   editNote,
   getNotesByUser,
-  getNotesByLabel,
+  getArchivedNotesByUser,
   getAllNotes,
+  deleteNote,
+  archiveNote,
 };

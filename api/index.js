@@ -49,13 +49,9 @@ apiRouter.get("/health", (req, res, next) => {
 //place routers here
 const usersRouter = require("./users");
 const notesRouter = require("./notes");
-const itemsRouter = require("./items");
-const labelsRouter = require("./labels");
 
 apiRouter.use("/users", usersRouter);
 apiRouter.use("/notes", notesRouter);
-apiRouter.use("/items", itemsRouter);
-apiRouter.use("/labels", labelsRouter);
 
 apiRouter.use((error, req, res, next) => {
   res.send({

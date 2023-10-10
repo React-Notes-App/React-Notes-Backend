@@ -84,7 +84,8 @@ const createTables = async () => {
                 users_Id INTEGER REFERENCES users(id) NOT NULL,
                 title VARCHAR(255) NOT NULL,
                 color VARCHAR(255) DEFAULT 'white',
-                date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                is_archived BOOLEAN DEFAULT false
                 );
                 
             CREATE TABLE items(
@@ -215,7 +216,6 @@ const rebuildDB = async () => {
     await getNotesByUser(1);
     //label functions
     await getAllLabels();
-    await getNotesByLabel("groceries");
   } catch (error) {
     console.error("Error during rebuildDB");
     throw error;

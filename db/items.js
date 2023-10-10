@@ -76,9 +76,31 @@ const getItemsByNoteId = async (noteId) => {
   }
 };
 
+const deleteItem = async (itemId) => {
+  try {
+    console.log("Deleting item", itemId);
+    const {
+      rows: [item],
+    } = await client.query(
+      `
+              DELETE FROM items
+              WHERE id=$1
+              RETURNING *;
+          `,
+      [itemId]
+    );
+    console.log("Finished deleting item", item);
+    return item;
+  } catch (error) {
+    console.error("Error deleting item");
+    throw error;
+  }
+};
+
 module.exports = {
   createItem,
   getAllItems,
   getItemsByNoteId,
   updateItem,
+  deleteItem,
 };
