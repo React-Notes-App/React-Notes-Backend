@@ -84,7 +84,7 @@ const createTables = async () => {
                 id SERIAL PRIMARY KEY,
                 users_Id INTEGER REFERENCES users(id) NOT NULL,
                 title VARCHAR(255) NOT NULL,
-                color VARCHAR(255) DEFAULT 'white',
+                color VARCHAR(255) DEFAULT 'gray',
                 date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 is_archived BOOLEAN DEFAULT false
                 );
@@ -99,7 +99,7 @@ const createTables = async () => {
             CREATE TABLE labels(
                 id SERIAL PRIMARY KEY,
                 notes_Id INTEGER REFERENCES notes(id),
-                label_name VARCHAR(255) UNIQUE NOT NULL
+                label_name VARCHAR(255) NOT NULL
                 );
 
             `);
@@ -198,13 +198,8 @@ const rebuildDB = async () => {
     //note functions
     await getAllNotes();
     await getNotesByUser(1);
-    await createNote({
-      userId: 2,
-      title: "Running",
-      color: "pink",
-    });
     await editNote(1, {
-      title: "Shopping",
+      title: "Shopping List 2323",
     });
 
     //item functions

@@ -177,6 +177,28 @@ const archiveNote = async (noteId) => {
   }
 };
 
+const unarchiveNote = async (noteId) => {
+  try {
+    console.log("Un-archiving note", noteId);
+    const {
+      rows: [note],
+    } = await client.query(
+      `
+                UPDATE notes
+                SET is_archived = false
+                WHERE id=$1
+                RETURNING *;
+            `,
+      [noteId]
+    );
+    console.log("Finished un-archiving note", note);
+    return note;
+  } catch (error) {
+    console.error("Error un-archiving note");
+    throw error;
+  }
+};
+
 module.exports = {
   createNote,
   editNote,
@@ -185,4 +207,5 @@ module.exports = {
   getAllNotes,
   deleteNote,
   archiveNote,
+  unarchiveNote,
 };

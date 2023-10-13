@@ -4,7 +4,13 @@ const usersRouter = express.Router();
 const bcrypt = require("bcrypt");
 
 const { requireUser, requireAdmin } = require("./utils");
-const { getAllUsers, createUser, getUser, getUserByEmail } = require("../db");
+const {
+  getAllUsers,
+  createUser,
+  getUser,
+  getUserByEmail,
+  getUserById,
+} = require("../db");
 
 //user routes will go here
 
@@ -137,7 +143,7 @@ usersRouter.get("/all_users", requireAdmin, async (req, res, next) => {
 
 usersRouter.get("/me", requireUser, async (req, res, next) => {
   try {
-    const user = await getUser(req.user.id);
+    const user = await getUserById(req.user.id);
 
     res.send({
       success: true,

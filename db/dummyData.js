@@ -90,22 +90,22 @@ const labelsToAdd = [
   {
     userId: 1,
     noteId: 1,
-    name: "Groceries",
+    label_name: "Groceries",
   },
   {
     userId: 1,
     noteId: 2,
-    name: "Work",
+    label_name: "Work",
   },
   {
     userId: 2,
     noteId: 3,
-    name: "Climbing",
+    label_name: "Climbing",
   },
   {
     userId: 3,
     noteId: 4,
-    name: "Home",
+    label_name: "Home",
   },
 ];
 

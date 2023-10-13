@@ -56,7 +56,7 @@ const updateUser = async ({ id, field = {} }) => {
 const getAllUsers = async () => {
   try {
     const { rows: users } = await client.query(`
-                SELECT id, name, email
+                SELECT id, name, email, is_admin
                 FROM users;
             `);
     console.log("Finished getting all users", users);

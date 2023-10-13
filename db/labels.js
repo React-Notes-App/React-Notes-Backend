@@ -32,18 +32,18 @@ const getLabelsByUser = async (usersId) => {
   }
 };
 
-const createLabel = async ({ name }) => {
+const createLabel = async ({ label_name, noteId }) => {
   try {
-    console.log("Creating label", name);
+    console.log("Creating label", label_name);
     const {
       rows: [label],
     } = await client.query(
       `
-                INSERT INTO labels(label_name)
-                VALUES($1)
+                INSERT INTO labels(label_name, notes_Id)
+                VALUES($1, $2)
                 RETURNING *;
             `,
-      [name]
+      [label_name, noteId]
     );
     console.log("Finished creating label", label);
     return label;
@@ -162,20 +162,20 @@ const getLabelsById = async (id) => {
   }
 };
 
-const getLabelsByName = async (name) => {
+const getLabelsByName = async (label_name) => {
   try {
-    console.log("Getting labels by name", name);
+    console.log("Getting labels by label_name", label_name);
     const { rows } = await client.query(
       `
                 SELECT * FROM labels
                 WHERE label_name=$1;
             `,
-      [name]
+      [label_name]
     );
-    console.log("Finished getting labels by name", rows);
+    console.log("Finished getting labels by label_name", rows);
     return rows;
   } catch (error) {
-    console.error("Error getting labels by name");
+    console.error("Error getting labels by label_name");
     throw error;
   }
 };

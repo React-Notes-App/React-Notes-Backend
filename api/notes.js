@@ -11,6 +11,7 @@ const {
   editNote,
   deleteNote,
   archiveNote,
+  unarchiveNote,
 
   //Items//
   getAllItems,
@@ -57,8 +58,7 @@ notesRouter.get("/user", requireUser, async (req, res, next) => {
     const notes = await getNotesByUser(id);
     if (!notes) {
       next({
-        name,
-        complete: "NoNotesError",
+        name: "NoNotesError",
         message: "There are no notes in the database",
       });
     } else {
@@ -78,8 +78,7 @@ notesRouter.get("/user/archived", requireUser, async (req, res, next) => {
     const notes = await getArchivedNotesByUser(id);
     if (notes.length === 0 || !notes) {
       next({
-        name,
-        complete: "NoNotesError",
+        name: "NoNotesError",
         message: "There are no archived notes in the database",
       });
     } else {
@@ -95,54 +94,68 @@ notesRouter.get("/user/archived", requireUser, async (req, res, next) => {
 
 notesRouter.post("/user/create_note", requireUser, async (req, res, next) => {
   try {
-    const { title } = req.body;
+    const { title, name, color, label_name } = req.body;
     const { id } = req.user;
     const newNote = await createNote({
       title,
       userId: id,
+      color: color || "gray",
+    });
+
+    const noteId = newNote.id;
+    const newItem = await createItem({ noteId, name });
+
+    const newLabel = await createLabel({
+      label_name: label_name || "No Label",
+      noteId,
     });
     if (!newNote) {
       next({
-        name,
-        complete: "NoteCreationError",
+        name: "NoteCreationError",
         message: "Note does not exist",
       });
     } else {
-      res.send({ note: newNote, success: true });
+      res.send({
+        notes: newNote,
+        items: newItem,
+        labels: newLabel,
+        success: true,
+      });
     }
   } catch ({ name, complete, message }) {
     next({ name, complete, message });
   }
 });
 
-//Edit Note Title
-//PATCH "/api/notes/user/:noteId/edit_note"
+//Edit Note Title and/or Color
+//PATCH "/api/notes/user/edit_note"
 
-notesRouter.patch(
-  "/user/:noteId/edit_note",
-  requireUser,
-  async (req, res, next) => {
-    try {
-      const noteId = req.params.noteId;
-      const { title, color } = req.body;
-      const editedNote = await editNote(noteId, { title, color });
-      if (!editedNote) {
-        next({
-          name,
-          complete: "NoteEditError",
-          message: "Note does not exist",
-        });
-      } else {
-        res.send({ note: editedNote, success: true });
-      }
-    } catch (error) {
-      next(error);
+notesRouter.patch("/user/edit_note", requireUser, async (req, res, next) => {
+  try {
+    const { title, color, id } = req.body;
+    const fields = {};
+    if (title) {
+      fields.title = title;
     }
+    if (color) {
+      fields.color = color;
+    }
+    const editedNote = await editNote(id, fields);
+    if (!editedNote) {
+      next({
+        name: "NoteEditError",
+        message: "Note does not exist",
+      });
+    } else {
+      res.send({ editedNote: editedNote, success: true });
+    }
+  } catch (error) {
+    next(error);
   }
-);
+});
 
 //DELETE Note
-//DELETE "/api/notes/user/:noteId"
+//DELETE "/api/notes/user/:noteId/delete_note"
 
 notesRouter.delete(
   "/user/:noteId/delete_note",
@@ -153,8 +166,7 @@ notesRouter.delete(
       const deletedNote = await deleteNote(noteId);
       if (!deletedNote) {
         next({
-          name,
-          complete: "NoteDeleteError",
+          name: "NoteDeleteError",
           message: "Note does not exist",
         });
       } else {
@@ -178,12 +190,35 @@ notesRouter.patch(
       const archivedNote = await archiveNote(noteId);
       if (!archivedNote) {
         next({
-          name,
-          complete: "NoteArchiveError",
+          name: "NoteArchiveError",
           message: "Note does not exist",
         });
       } else {
         res.send({ note: archivedNote, success: true });
+      }
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+//UNARCHIVE Note
+//PATCH "/api/notes/user/:noteId/unarchive"
+
+notesRouter.patch(
+  "/user/:noteId/unarchive_note",
+  requireUser,
+  async (req, res, next) => {
+    try {
+      const noteId = req.params.noteId;
+      const unArchivedNote = await unarchiveNote(noteId);
+      if (!unArchivedNote) {
+        next({
+          name: "NoteUnarchiveError",
+          message: "Note does not exist",
+        });
+      } else {
+        res.send({ note: unArchivedNote, success: true });
       }
     } catch (error) {
       next(error);
@@ -211,55 +246,55 @@ notesRouter.get("/all_items", requireAdmin, async (req, res, next) => {
 });
 
 //POST Create Item For Note
-//POST "/api/notes/user/:noteId/add_item"
+//POST "/api/notes/user/add_item"
 
-notesRouter.post(
-  "/user/:noteId/add_item",
-  requireUser,
-  async (req, res, next) => {
-    try {
-      const { noteId } = req.params;
-      const { name } = req.body;
-      const newItem = await createItem({ noteId, name });
-      if (!newItem) {
-        next({
-          name: "ItemCreationError",
-          message: "Item does not exist",
-        });
-      } else {
-        res.send({ newItem: newItem, success: true });
-      }
-    } catch (error) {
-      next(error);
+notesRouter.post("/user/add_item", requireUser, async (req, res, next) => {
+  try {
+    const { name, noteId } = req.body;
+    const newItem = await createItem({
+      noteId: noteId,
+      name: name,
+    });
+    if (!newItem) {
+      next({
+        name: "ItemCreationError",
+        message: "Item does not exist",
+      });
+    } else {
+      res.send({ newItem: newItem, success: true });
     }
+  } catch (error) {
+    next(error);
   }
-);
+});
 
 //PATCH Edit Item For Note
-//PATCH "/api/notes/user/:noteId/items/:itemId"
+//PATCH "/api/notes/user/edit_item/"
 
-notesRouter.patch(
-  "/user/:noteId/items/edit_item/:itemId",
-  requireUser,
-  async (req, res, next) => {
-    try {
-      const itemId = req.params.itemId;
-      const { item_name, completed } = req.body;
-      const editedItem = await updateItem(itemId, { item_name, completed });
-
-      if (!editedItem) {
-        next({
-          name: "ItemEditError",
-          message: "Item does not exist",
-        });
-      } else {
-        res.send({ newItem: editedItem, success: true });
-      }
-    } catch (error) {
-      next(error);
+notesRouter.patch("/user/edit_item/", requireUser, async (req, res, next) => {
+  try {
+    const { id, item_name, completed } = req.body;
+    const fields = {};
+    if (item_name) {
+      fields.item_name = item_name;
     }
+    if (completed) {
+      fields.completed = completed;
+    }
+    const editedItem = await updateItem(id, fields);
+
+    if (!editedItem) {
+      next({
+        name: "ItemEditError",
+        message: "Item does not exist",
+      });
+    } else {
+      res.send({ editedItem: editedItem, success: true });
+    }
+  } catch (error) {
+    next(error);
   }
-);
+});
 
 //DELETE Item For Note
 //DELETE "/api/notes/user/:noteId/items/:itemId"
