@@ -21,13 +21,13 @@ const notesToAdd = [
   {
     userId: 1,
     title: "Groceries",
-    color: "red",
+    color: "rgb(33, 150, 243)",
     date: new Date(),
   },
   {
     userId: 1,
     title: "Work",
-    color: "blue",
+    color: "rgb(255, 193, 7)",
     date: new Date(),
   },
   {
@@ -46,42 +46,42 @@ const notesToAdd = [
 
 const itemsToAdd = [
   {
-    noteId: 1,
+    id: 1,
     name: "Milk",
     completed: false,
   },
   {
-    noteId: 1,
+    id: 1,
     name: "Eggs",
     completed: false,
   },
   {
-    noteId: 2,
+    id: 2,
     name: "Write Code",
     completed: false,
   },
   {
-    noteId: 2,
+    id: 2,
     name: "Review Code",
     completed: false,
   },
   {
-    noteId: 3,
+    id: 3,
     name: "5x3's",
     completed: false,
   },
   {
-    noteId: 3,
+    id: 3,
     name: "Suicides",
     completed: false,
   },
   {
-    noteId: 4,
+    id: 4,
     name: "Dishes",
     completed: false,
   },
   {
-    noteId: 4,
+    id: 4,
     name: "Vacuum",
     completed: false,
   },

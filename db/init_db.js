@@ -19,14 +19,14 @@ const {
   deleteNote,
   getNotesByUser,
   getNotesByLabel,
-  editNote,
+  editNoteTitle,
 
   //item exports
 
   createItem,
   getItem,
   getAllItems,
-  updateItem,
+  editItemName,
   deleteItem,
   getItemsByNoteId,
 
@@ -91,14 +91,14 @@ const createTables = async () => {
                 
             CREATE TABLE items(
                 id SERIAL PRIMARY KEY,
-                notes_Id INTEGER REFERENCES notes(id) NOT NULL,
+                notes_Id INTEGER REFERENCES notes(id) ON DELETE CASCADE,
                 item_name VARCHAR(255) NOT NULL,
                 completed BOOLEAN DEFAULT false
                 );
 
             CREATE TABLE labels(
                 id SERIAL PRIMARY KEY,
-                notes_Id INTEGER REFERENCES notes(id),
+                notes_Id INTEGER REFERENCES notes(id) ON DELETE CASCADE,
                 label_name VARCHAR(255) NOT NULL
                 );
 
@@ -198,17 +198,16 @@ const rebuildDB = async () => {
     //note functions
     await getAllNotes();
     await getNotesByUser(1);
-    await editNote(1, {
-      title: "Shopping List 2323",
-    });
+    await editNoteTitle({ id: 1, title: "Shopping List 2323" });
 
     //item functions
     await createItem({
-      noteId: 1,
+      id: 1,
       name: "Bread",
       completed: false,
     });
     await getItemsByNoteId(1);
+    await editItemName(1, "Bread");
     await getNotesByUser(1);
     //label functions
     await getAllLabels();

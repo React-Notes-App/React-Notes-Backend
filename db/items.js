@@ -1,6 +1,6 @@
 const client = require("./client");
 
-const createItem = async ({ noteId, name }) => {
+const createItem = async ({ id, name }) => {
   try {
     const {
       rows: [item],
@@ -10,7 +10,7 @@ const createItem = async ({ noteId, name }) => {
               VALUES($1, $2)
               RETURNING *;
           `,
-      [noteId, name]
+      [id, name]
     );
     console.log("Finished creating item", item);
     return item;
@@ -20,28 +20,48 @@ const createItem = async ({ noteId, name }) => {
   }
 };
 
-const updateItem = async (id, fields = {}) => {
-  console.log("Updating item");
-  const setString = Object.keys(fields)
-    .map((key, index) => `"${key}"=$${index + 1}`)
-    .join(", ");
-
-  if (setString.length === 0) {
-    return;
+const editItemName = async (id, item_name) => {
+  try {
+    console.log("Updating item name", id, item_name);
+    const {
+      rows: [item],
+    } = await client.query(
+      `
+            UPDATE items
+            SET item_name=$2
+            WHERE id=$1
+            RETURNING *;
+        `,
+      [id, item_name]
+    );
+    console.log("Finished updating item", item);
+    return item;
+  } catch (error) {
+    console.error("Error updating item");
+    throw error;
   }
-  const {
-    rows: [item],
-  } = await client.query(
-    `
-              UPDATE items
-              SET ${setString}
-              WHERE id=${id}
-              RETURNING *;
-          `,
-    Object.values(fields)
-  );
-  console.log("Finished updating item", item);
-  return item;
+};
+
+const editItemStatus = async (id, completed) => {
+  try {
+    console.log("Updating item status", id, completed);
+    const {
+      rows: [item],
+    } = await client.query(
+      `
+            UPDATE items
+            SET completed=$2
+            WHERE id=$1
+            RETURNING *;
+        `,
+      [id, completed]
+    );
+    console.log("Finished updating item status", item);
+    return item;
+  } catch (error) {
+    console.error("Error updating item status");
+    throw error;
+  }
 };
 
 const getAllItems = async () => {
@@ -101,6 +121,7 @@ module.exports = {
   createItem,
   getAllItems,
   getItemsByNoteId,
-  updateItem,
+  editItemName,
+  editItemStatus,
   deleteItem,
 };
