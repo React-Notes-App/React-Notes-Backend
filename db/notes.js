@@ -1,6 +1,6 @@
 const client = require("./client");
 const { getItemsByNoteId } = require("./items");
-const { getLabelsByNoteId } = require("./labels");
+const { getLabelsByNoteId } = require("./notes_labels");
 
 const createNote = async ({ userId, title, color }) => {
   try {
@@ -126,24 +126,26 @@ const getNotesByUser = async (id) => {
     console.log("Getting notes by user", id);
     const { rows } = await client.query(
       `
-                SELECT notes.*, 
-                array_agg(row_to_json(items.*))as items,
-                array_agg(row_to_json(labels.*))as labels
-                
-                FROM 
-                notes
-                LEFT OUTER JOIN items ON notes.id = items.notes_Id
-                LEFT OUTER JOIN labels ON notes.id = labels.notes_Id
-                WHERE notes.users_Id =$1 AND notes.is_archived = false
-                GROUP BY notes.id;
+                SELECT notes.*
+                FROM notes
+                WHERE notes.users_Id =$1 AND notes.is_archived = false;
             `,
       [id]
     );
+
+    let notesWithItemsAndLabels = await Promise.all(
+      rows.map(async (note) => {
+        note.items = await getItemsByNoteId(note.id);
+        note.labels = await getLabelsByNoteId(note.id);
+        return note;
+      })
+    );
+
     console.log(
       "Finished getting notes by user",
       JSON.stringify(rows, null, 2)
     );
-    return rows;
+    return notesWithItemsAndLabels;
   } catch (error) {
     console.error("Error getting notes by user");
     throw error;

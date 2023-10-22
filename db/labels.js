@@ -32,18 +32,18 @@ const getLabelsByUser = async (usersId) => {
   }
 };
 
-const createLabel = async ({ label_name, noteId }) => {
+const createLabel = async ({ name }) => {
   try {
-    console.log("Creating label", label_name);
+    console.log("Creating label", name);
     const {
       rows: [label],
     } = await client.query(
       `
-                INSERT INTO labels(label_name, notes_Id)
-                VALUES($1, $2)
+                INSERT INTO labels(label_name)
+                VALUES($1)
                 RETURNING *;
             `,
-      [label_name, noteId]
+      [name]
     );
     console.log("Finished creating label", label);
     return label;
@@ -53,49 +53,49 @@ const createLabel = async ({ label_name, noteId }) => {
   }
 };
 
-const addLabelToNote = async (noteId, labelId) => {
-  try {
-    console.log("Adding label to note", noteId, labelId);
-    const {
-      rows: [label],
-    } = await client.query(
-      `
-                UPDATE labels
-                SET notes_Id=$1
-                WHERE labels.id=$2
-                RETURNING *;
-            `,
-      [noteId, labelId]
-    );
-    console.log("Finished adding label to note", label);
-    return label;
-  } catch (error) {
-    console.error("Error adding label to note");
-    throw error;
-  }
-};
+// const addLabelToNote = async (noteId, labelId) => {
+//   try {
+//     console.log("Adding label to note", noteId, labelId);
+//     const {
+//       rows: [label],
+//     } = await client.query(
+//       `
+//                 UPDATE labels
+//                 SET notes_Id=$1
+//                 WHERE labels.id=$2
+//                 RETURNING *;
+//             `,
+//       [noteId, labelId]
+//     );
+//     console.log("Finished adding label to note", label);
+//     return label;
+//   } catch (error) {
+//     console.error("Error adding label to note");
+//     throw error;
+//   }
+// };
 
-const removeLabelFromNote = async (labelId, noteId) => {
-  try {
-    console.log("Removing label from note", labelId, noteId);
-    const {
-      rows: [label],
-    } = await client.query(
-      `
-                UPDATE labels
-                SET notes_Id=NULL
-                WHERE labels.id=$1
-                RETURNING *;
-            `,
-      [noteId, labelId]
-    );
-    console.log("Finished removing label from note", label);
-    return label;
-  } catch (error) {
-    console.error("Error removing label from note");
-    throw error;
-  }
-};
+// const removeLabelFromNote = async (labelId, noteId) => {
+//   try {
+//     console.log("Removing label from note", labelId, noteId);
+//     const {
+//       rows: [label],
+//     } = await client.query(
+//       `
+//                 UPDATE labels
+//                 SET notes_Id=NULL
+//                 WHERE labels.id=$1
+//                 RETURNING *;
+//             `,
+//       [noteId, labelId]
+//     );
+//     console.log("Finished removing label from note", label);
+//     return label;
+//   } catch (error) {
+//     console.error("Error removing label from note");
+//     throw error;
+//   }
+// };
 
 const editLabel = async (id, fields = {}) => {
   const setString = Object.keys(fields)
@@ -126,23 +126,23 @@ const editLabel = async (id, fields = {}) => {
   }
 };
 
-const getLabelsByNoteId = async (noteId) => {
-  try {
-    console.log("Getting labels by note", noteId);
-    const { rows } = await client.query(
-      `
-                SELECT * FROM labels
-                WHERE notes_Id=$1;
-            `,
-      [noteId]
-    );
-    console.log("Finished getting labels by note", rows);
-    return rows;
-  } catch (error) {
-    console.error("Error getting labels by note");
-    throw error;
-  }
-};
+// const getLabelsByNoteId = async (noteId) => {
+//   try {
+//     console.log("Getting labels by note", noteId);
+//     const { rows } = await client.query(
+//       `
+//                 SELECT * FROM labels
+//                 WHERE notes_Id=$1;
+//             `,
+//       [noteId]
+//     );
+//     console.log("Finished getting labels by note", rows);
+//     return rows;
+//   } catch (error) {
+//     console.error("Error getting labels by note");
+//     throw error;
+//   }
+// };
 
 const getLabelsById = async (id) => {
   try {
@@ -162,15 +162,15 @@ const getLabelsById = async (id) => {
   }
 };
 
-const getLabelsByName = async (label_name) => {
+const getLabelByName = async ({ name }) => {
   try {
-    console.log("Getting labels by label_name", label_name);
+    console.log("Getting labels by label_name", name);
     const { rows } = await client.query(
       `
                 SELECT * FROM labels
                 WHERE label_name=$1;
             `,
-      [label_name]
+      [name]
     );
     console.log("Finished getting labels by label_name", rows);
     return rows;
@@ -203,12 +203,11 @@ const deleteLabel = async (labelId) => {
 module.exports = {
   getAllLabels,
   createLabel,
-  addLabelToNote,
-  removeLabelFromNote,
+  // addLabelToNote,
+  // removeLabelFromNote,
   editLabel,
-  getLabelsByNoteId,
   getLabelsById,
-  getLabelsByName,
+  getLabelByName,
   getLabelsByUser,
   deleteLabel,
 };

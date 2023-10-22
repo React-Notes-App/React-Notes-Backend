@@ -38,6 +38,11 @@ const {
   updateLabel,
   deleteLabel,
   getLabelsByUser,
+
+  //notes_labels exports
+  createNotesLabels,
+  getNotesByLabelId,
+  getLabelsByNoteId,
 } = require("./index");
 
 const {
@@ -45,6 +50,7 @@ const {
   notesToAdd,
   labelsToAdd,
   itemsToAdd,
+  notes_labelsToAdd,
 } = require("./dummyData");
 
 const dropTables = async () => {
@@ -54,6 +60,7 @@ const dropTables = async () => {
     console.log("Starting to drop tables...");
 
     await client.query(`
+            DROP TABLE IF EXISTS notes_labels;
             DROP TABLE IF EXISTS labels;
             DROP TABLE IF EXISTS items;
             DROP TABLE IF EXISTS notes;
@@ -99,9 +106,15 @@ const createTables = async () => {
             CREATE TABLE labels(
                 id SERIAL PRIMARY KEY,
                 notes_Id INTEGER REFERENCES notes(id) ON DELETE CASCADE,
-                label_name VARCHAR(255) NOT NULL
+                label_name VARCHAR(255) UNIQUE NOT NULL
                 );
 
+            CREATE TABLE notes_labels(
+                id SERIAL PRIMARY KEY,
+                notes_Id INTEGER REFERENCES notes(id) ON DELETE CASCADE,
+                labels_Id INTEGER REFERENCES labels(id) ON DELETE CASCADE,
+                UNIQUE(notes_Id, labels_Id)
+                );
             `);
 
     console.log("Finished building tables!");
@@ -185,6 +198,11 @@ const rebuildDB = async () => {
     await createInitialItems();
     await createInitialLabels();
 
+    const addedNoteLabels = await Promise.all(
+      notes_labelsToAdd.map(createNotesLabels)
+    );
+    console.log("Notes_labels created:", addedNoteLabels);
+
     //user functions
     await getAllUsers();
     await getUserById(1);
@@ -198,19 +216,17 @@ const rebuildDB = async () => {
     //note functions
     await getAllNotes();
     await getNotesByUser(1);
-    await editNoteTitle({ id: 1, title: "Shopping List 2323" });
+    await editNoteTitle({ id: 1, title: "Shopping List" });
 
     //item functions
-    await createItem({
-      id: 1,
-      name: "Bread",
-      completed: false,
-    });
     await getItemsByNoteId(1);
     await editItemName(1, "Bread");
     await getNotesByUser(1);
     //label functions
     await getAllLabels();
+    await getNotesByLabel(1);
+    await getLabelsByNoteId(1);
+    await getLabelsByUser(1);
   } catch (error) {
     console.error("Error during rebuildDB");
     throw error;

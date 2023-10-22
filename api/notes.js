@@ -227,46 +227,54 @@ notesRouter.delete("/user/delete_note", requireUser, async (req, res, next) => {
 });
 
 //ARCHIVE Note
-//PATCH "/api/notes/user/:noteId/archive"
+//PATCH "/api/notes/user/archive"
 
-notesRouter.patch(
-  "/user/:noteId/archive_note",
-  requireUser,
-  async (req, res, next) => {
-    try {
-      const noteId = req.params.noteId;
-      const archivedNote = await archiveNote(noteId);
-      if (!archivedNote) {
-        next({
-          name: "NoteArchiveError",
-          message: "Note does not exist",
-        });
-      } else {
-        res.send({ note: archivedNote, success: true });
-      }
-    } catch (error) {
-      next(error);
+notesRouter.patch("/user/archive_note", requireUser, async (req, res, next) => {
+  try {
+    const { noteId } = req.body;
+    const archivedNote = await archiveNote(noteId);
+
+    const items = await getItemsByNoteId(noteId);
+    const labels = await getLabelsByNoteId(noteId);
+    if (!archivedNote) {
+      next({
+        name: "NoteArchiveError",
+        message: "Note does not exist",
+      });
+    } else {
+      res.send({
+        note: { ...archivedNote, items: items, labels: labels },
+        success: true,
+      });
     }
+  } catch (error) {
+    next(error);
   }
-);
+});
 
 //UNARCHIVE Note
-//PATCH "/api/notes/user/:noteId/unarchive"
+//PATCH "/api/notes/user/unarchive"
 
 notesRouter.patch(
-  "/user/:noteId/unarchive_note",
+  "/user/unarchive_note",
   requireUser,
   async (req, res, next) => {
     try {
-      const noteId = req.params.noteId;
+      const { noteId } = req.body;
       const unArchivedNote = await unarchiveNote(noteId);
+
+      const items = await getItemsByNoteId(noteId);
+      const labels = await getLabelsByNoteId(noteId);
       if (!unArchivedNote) {
         next({
           name: "NoteUnarchiveError",
           message: "Note does not exist",
         });
       } else {
-        res.send({ note: unArchivedNote, success: true });
+        res.send({
+          note: { ...unArchivedNote, items: items, labels: labels },
+          success: true,
+        });
       }
     } catch (error) {
       next(error);
@@ -425,8 +433,7 @@ notesRouter.get("/all_labels", requireAdmin, async (req, res, next) => {
     const labels = await getAllLabels();
     if (!labels) {
       next({
-        name,
-        complete: "NoLabelsError",
+        name: "NoLabelsError",
         message: "There are no labels in the database",
       });
     } else {

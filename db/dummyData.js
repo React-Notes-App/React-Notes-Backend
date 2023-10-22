@@ -88,24 +88,67 @@ const itemsToAdd = [
 ];
 const labelsToAdd = [
   {
-    userId: 1,
+    name: "Groceries",
+  },
+  {
+    name: "Work",
+  },
+  {
+    name: "Climbing",
+  },
+  {
+    name: "Home",
+  },
+  {
+    name: "Important",
+  },
+  {
+    name: "Mountain Biking",
+  },
+  {
+    name: "School",
+  },
+  {
+    name: "Chores",
+  },
+];
+
+const notes_labelsToAdd = [
+  {
     noteId: 1,
-    label_name: "Groceries",
+    labelId: 1,
   },
   {
-    userId: 1,
+    noteId: 1,
+    labelId: 2,
+  },
+  {
     noteId: 2,
-    label_name: "Work",
+    labelId: 3,
   },
   {
-    userId: 2,
+    noteId: 2,
+    labelId: 4,
+  },
+  {
     noteId: 3,
-    label_name: "Climbing",
+    labelId: 5,
   },
   {
-    userId: 3,
+    noteId: 3,
+    labelId: 6,
+  },
+  {
     noteId: 4,
-    label_name: "Home",
+    labelId: 7,
+  },
+  {
+    noteId: 4,
+    labelId: 8,
+  },
+  {
+    noteId: 4,
+    labelId: 1,
   },
 ];
 
@@ -114,4 +157,5 @@ module.exports = {
   notesToAdd,
   itemsToAdd,
   labelsToAdd,
+  notes_labelsToAdd,
 };
