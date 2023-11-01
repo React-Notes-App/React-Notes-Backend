@@ -66,43 +66,14 @@ const editNoteColor = async ({ id, color }) => {
   }
 };
 
-// const editNote = async (id, { fields }) => {
-//   const setString = Object.keys(fields)
-//     .map((key, index) => `"${key}"=$${index + 1}`)
-//     .join(", ");
-
-//   if (setString.length === 0) {
-//     return;
-//   }
-//   try {
-//     console.log("Editing note");
-//     const {
-//       rows: [note],
-//     } = await client.query(
-//       `
-//                 UPDATE notes
-//                 SET ${setString}
-//                 WHERE id=${id}
-//                 RETURNING *;
-//             `,
-//       Object.values(fields)
-//     );
-//     console.log("Finished editing note", note);
-//     return note;
-//   } catch (error) {
-//     console.error("Error editing note");
-//     throw error;
-//   }
-// };
-
 const getAllNotes = async () => {
   try {
     console.log("Getting all notes");
     const { rows: notes } = await client.query(`
                 SELECT * FROM notes;
             `);
-    console.log("Finished getting all notes", notes);
-    let notesWithItems = await Promise.all(
+
+    let notesWithItemsAndLabels = await Promise.all(
       notes.map(async (note) => {
         note.items = await getItemsByNoteId(note.id);
         note.labels = await getLabelsByNoteId(note.id);
@@ -110,33 +81,31 @@ const getAllNotes = async () => {
       })
     );
 
-    console.log(
-      "Finished getting all notes",
-      JSON.stringify(notesWithItems, null, 2)
-    );
-    return notesWithItems;
+    console.log("Finished getting all notes", JSON.stringify(notes, null, 2));
+    return notesWithItemsAndLabels;
   } catch (error) {
     console.error("Error getting all notes");
     throw error;
   }
 };
 
-const getNotesByUser = async (id) => {
+const getNotesByUser = async (userId) => {
   try {
-    console.log("Getting notes by user", id);
+    console.log("Getting notes by user", userId);
     const { rows } = await client.query(
       `
                 SELECT notes.*
                 FROM notes
-                WHERE notes.users_Id =$1 AND notes.is_archived = false;
+                WHERE notes.users_Id =$1;
             `,
-      [id]
+      [userId]
     );
 
     let notesWithItemsAndLabels = await Promise.all(
       rows.map(async (note) => {
-        note.items = await getItemsByNoteId(note.id);
-        note.labels = await getLabelsByNoteId(note.id);
+        let noteId = note.id;
+        note.items = await getItemsByNoteId(noteId);
+        note.labels = await getLabelsByNoteId(noteId);
         return note;
       })
     );
@@ -159,19 +128,15 @@ const getNoteById = async (id) => {
       rows: [note],
     } = await client.query(
       `
-                SELECT notes.*,
-                array_agg(row_to_json(items.*))as items,
-                array_agg(row_to_json(labels.*))as labels
-
-                FROM
-                notes
-                LEFT OUTER JOIN items ON notes.id = items.notes_Id
-                LEFT OUTER JOIN labels ON notes.id = labels.notes_Id
+                SELECT notes.*
+                FROM notes
+               
                 WHERE notes.id=$1 AND notes.is_archived = false
-                GROUP BY notes.id;
+               
             `,
       [id]
     );
+
     console.log("Finished getting note by id", note);
     return note;
   } catch (error) {
@@ -180,37 +145,39 @@ const getNoteById = async (id) => {
   }
 };
 
-const getArchivedNotesByUser = async (id) => {
+const getArchivedNotesByUser = async (userId) => {
   try {
-    console.log("Getting archived notes by user", id);
+    console.log("Getting archived notes by user", userId);
     const { rows } = await client.query(
       `
-                SELECT notes.*, 
-                array_agg(row_to_json(items.*))as items
-                
-                FROM 
-                notes
-                LEFT OUTER JOIN items ON notes.id = items.notes_Id
-                LEFT OUTER JOIN labels ON notes.id = labels.notes_Id
-                WHERE notes.users_Id =$1 AND notes.is_archived = true
-                GROUP BY notes.id;
+                SELECT notes.*
+                FROM notes
+                WHERE notes.users_Id =$1 AND notes.is_archived = true;
             `,
-      [id]
+      [userId]
+    );
+
+    let notesWithItemsAndLabels = await Promise.all(
+      rows.map(async (note) => {
+        note.items = await getItemsByNoteId(note.id);
+        note.labels = await getLabelsByNoteId(note.id);
+        return note;
+      })
     );
     console.log(
       "Finished getting archived notes by user",
       JSON.stringify(rows, null, 2)
     );
-    return rows;
+    return notesWithItemsAndLabels;
   } catch (error) {
     console.error("Error getting archived notes by user");
     throw error;
   }
 };
 
-const deleteNote = async (noteId) => {
+const deleteNote = async (id) => {
   try {
-    console.log("Deleting note", noteId);
+    console.log("Deleting note", id);
     const {
       rows: [note],
     } = await client.query(
@@ -219,7 +186,7 @@ const deleteNote = async (noteId) => {
                 WHERE id=$1
                 RETURNING *;
             `,
-      [noteId]
+      [id]
     );
     console.log("Finished deleting note", note);
     return note;
@@ -229,9 +196,9 @@ const deleteNote = async (noteId) => {
   }
 };
 
-const archiveNote = async (noteId) => {
+const archiveNote = async (id) => {
   try {
-    console.log("Archiving note", noteId);
+    console.log("Archiving note", id);
     const {
       rows: [note],
     } = await client.query(
@@ -241,7 +208,7 @@ const archiveNote = async (noteId) => {
                 WHERE id=$1
                 RETURNING *;
             `,
-      [noteId]
+      [id]
     );
     console.log("Finished archiving note", note);
     return note;
@@ -251,9 +218,9 @@ const archiveNote = async (noteId) => {
   }
 };
 
-const unarchiveNote = async (noteId) => {
+const unarchiveNote = async (id) => {
   try {
-    console.log("Un-archiving note", noteId);
+    console.log("Un-archiving note", id);
     const {
       rows: [note],
     } = await client.query(
@@ -263,7 +230,7 @@ const unarchiveNote = async (noteId) => {
                 WHERE id=$1
                 RETURNING *;
             `,
-      [noteId]
+      [id]
     );
     console.log("Finished un-archiving note", note);
     return note;

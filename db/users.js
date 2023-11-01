@@ -24,7 +24,7 @@ const createUser = async ({ name, email, password, is_admin }) => {
   }
 };
 
-const updateUser = async ({ id, field = {} }) => {
+const updateUser = async ({ id, field }) => {
   const setString = Object.keys(field)
     .map((key, index) => `"${key}"=$${index + 1}`)
     .join(", ");

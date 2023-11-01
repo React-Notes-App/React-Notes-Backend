@@ -24,6 +24,7 @@ const {
   //Labels//
   getAllLabels,
   getLabelsByUser,
+  getActiveLabelsByUser,
   getLabelsByNoteId,
   createLabel,
   addLabelToNote,
@@ -32,6 +33,9 @@ const {
   deleteLabel,
   getNoteById,
   editItemStatus,
+  createNotesLabels,
+  getNotesByLabel,
+  getNotesLabelsByUser,
 } = require("../db");
 
 //GET All Notes  ***needs Admin***
@@ -42,8 +46,7 @@ notesRouter.get("/all_notes", requireAdmin, async (req, res, next) => {
     const notes = await getAllNotes();
     if (!notes) {
       next({
-        name,
-        complete: "NoNotesError",
+        name: "NoNotesError",
         message: "There are no notes in the database",
       });
     } else {
@@ -67,7 +70,10 @@ notesRouter.get("/user", requireUser, async (req, res, next) => {
         message: "There are no notes in the database",
       });
     } else {
-      res.send({ notes: notes, success: true });
+      res.send({
+        notes: notes,
+        success: true,
+      });
     }
   } catch (error) {
     next(error);
@@ -79,7 +85,7 @@ notesRouter.get("/user", requireUser, async (req, res, next) => {
 
 notesRouter.get("/user/archived", requireUser, async (req, res, next) => {
   try {
-    const id = req.user.id;
+    const { id } = req.user;
     const notes = await getArchivedNotesByUser(id);
     if (notes.length === 0 || !notes) {
       next({
@@ -87,7 +93,10 @@ notesRouter.get("/user/archived", requireUser, async (req, res, next) => {
         message: "There are no archived notes in the database",
       });
     } else {
-      res.send({ notes: notes, success: true });
+      res.send({
+        notes: notes,
+        success: true,
+      });
     }
   } catch (error) {
     next(error);
@@ -102,17 +111,20 @@ notesRouter.post("/user/create_note", requireUser, async (req, res, next) => {
     const { title, name, color, label_name } = req.body;
     const { id } = req.user;
     const newNote = await createNote({
-      title,
       userId: id,
+      title: title || "No Title",
       color: color || "gray",
     });
 
     const noteId = newNote.id;
-    const newItem = await createItem({ noteId, name });
+    const newItem = await createItem({
+      id: noteId,
+      name: name || "No Item",
+      completed: false,
+    });
 
     const newLabel = await createLabel({
       label_name: label_name || "No Label",
-      noteId,
     });
     if (!newNote) {
       next({
@@ -142,9 +154,10 @@ notesRouter.patch("/user/edit_note", requireUser, async (req, res, next) => {
       title: title,
     });
 
-    const items = await getItemsByNoteId(id);
-
-    const labels = await getLabelsByNoteId(id);
+    let noteId = editedNote.id;
+    const note = await getNoteById(noteId);
+    const items = await getItemsByNoteId(noteId);
+    const labels = await getLabelsByNoteId(noteId);
     if (!editedNote) {
       next({
         name: "NoteEditError",
@@ -175,9 +188,9 @@ notesRouter.patch(
         id: id,
         color: color,
       });
-
-      const items = await getItemsByNoteId(id);
-      const labels = await getLabelsByNoteId(id);
+      let noteId = editedNote.id;
+      const items = await getItemsByNoteId(noteId);
+      const labels = await getLabelsByNoteId(noteId);
       if (!editedNote) {
         next({
           name: "NoteEditError",
@@ -200,8 +213,10 @@ notesRouter.patch(
 
 notesRouter.delete("/user/delete_note", requireUser, async (req, res, next) => {
   try {
-    const { noteId } = req.body;
-    const deletedNote = await deleteNote(noteId);
+    const { id } = req.body;
+    const deletedNote = await deleteNote(id);
+
+    let noteId = deletedNote.id;
     const items = await getItemsByNoteId(noteId);
 
     const labels = await getLabelsByNoteId(noteId);
@@ -231,9 +246,10 @@ notesRouter.delete("/user/delete_note", requireUser, async (req, res, next) => {
 
 notesRouter.patch("/user/archive_note", requireUser, async (req, res, next) => {
   try {
-    const { noteId } = req.body;
-    const archivedNote = await archiveNote(noteId);
+    const { id } = req.body;
+    const archivedNote = await archiveNote(id);
 
+    let noteId = archivedNote.id;
     const items = await getItemsByNoteId(noteId);
     const labels = await getLabelsByNoteId(noteId);
     if (!archivedNote) {
@@ -260,9 +276,10 @@ notesRouter.patch(
   requireUser,
   async (req, res, next) => {
     try {
-      const { noteId } = req.body;
-      const unArchivedNote = await unarchiveNote(noteId);
+      const { id } = req.body;
+      const unArchivedNote = await unarchiveNote(id);
 
+      let noteId = unArchivedNote.id;
       const items = await getItemsByNoteId(noteId);
       const labels = await getLabelsByNoteId(noteId);
       if (!unArchivedNote) {
@@ -314,9 +331,10 @@ notesRouter.post("/user/add_item", requireUser, async (req, res, next) => {
     });
 
     const note = await getNoteById(id);
-    const items = await getItemsByNoteId(id);
 
-    const labels = await getLabelsByNoteId(id);
+    let noteId = note.id;
+    const items = await getItemsByNoteId(noteId);
+    const labels = await getLabelsByNoteId(noteId);
 
     if (!newItem) {
       next({
@@ -328,7 +346,6 @@ notesRouter.post("/user/add_item", requireUser, async (req, res, next) => {
         note: { ...note, items: items, labels: labels },
         success: true,
       });
-      console.log(oldItems);
     }
   } catch (error) {
     next(error);
@@ -340,12 +357,15 @@ notesRouter.post("/user/add_item", requireUser, async (req, res, next) => {
 
 notesRouter.patch("/user/edit_item", requireUser, async (req, res, next) => {
   try {
-    const { id, item_name, noteId } = req.body;
+    const { id, name, noteId } = req.body;
 
-    const editedItem = await editItemName(id, item_name);
+    const editedItem = await editItemName({
+      id: id,
+      name: name,
+    });
 
-    const note = await getNoteById(noteId);
     const items = await getItemsByNoteId(noteId);
+    const note = await getNoteById(noteId);
     const labels = await getLabelsByNoteId(noteId);
 
     if (!editedItem) {
@@ -444,17 +464,16 @@ notesRouter.get("/all_labels", requireAdmin, async (req, res, next) => {
   }
 });
 
-//GET User Labels
-//GET "/api/notes/user/labels"
+//GET Active Labels By User
+//GET "/api/notes/user/active_labels"
 
-notesRouter.get("/user/labels", requireUser, async (req, res, next) => {
+notesRouter.get("/user/active_labels", requireUser, async (req, res, next) => {
   try {
     const id = req.user.id;
-    const labels = await getLabelsByUser(id);
+    const labels = await getActiveLabelsByUser(id);
     if (!labels) {
       next({
-        name,
-        complete: "NoLabelsError",
+        name: "NoLabelsError",
         message: "There are no labels in the database",
       });
     } else {
@@ -465,49 +484,94 @@ notesRouter.get("/user/labels", requireUser, async (req, res, next) => {
   }
 });
 
+//GET User Labels
+//GET "/api/notes/user/labels"
+
+notesRouter.get("/user/labels", requireUser, async (req, res, next) => {
+  try {
+    const id = req.user.id;
+    const labels = await getLabelsByUser(id);
+    if (!labels) {
+      next({
+        name: "NoLabelsError",
+        message: "There are no labels in the database",
+      });
+    } else {
+      res.send({ labels: labels, success: true });
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
+//GET Notes By Label
+//GET "/api/notes/user/notes_labels_by_user"
+
+notesRouter.get("/user/notes_by_label", requireUser, async (req, res, next) => {
+  try {
+    const { id } = req.user;
+    const notes = await getNotesLabelsByUser(id);
+    if (!notes) {
+      next({
+        name: "NoNotesError",
+        message: "There are no notes in the database",
+      });
+    } else {
+      res.send({ notes: notes, success: true });
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
 //POST Create Label
 //POST "/api/notes/user/create_label"
 
-notesRouter.post(
-  "/user/labels/create_label",
-  requireUser,
-  async (req, res, next) => {
-    try {
-      const { name } = req.body;
-      const newLabel = await createLabel({ name });
-      if (!newLabel) {
-        next({
-          name,
-          complete: "LabelCreationError",
-          message: "Label does not exist",
-        });
-      } else {
-        res.send({ label: newLabel, success: true });
-      }
-    } catch ({ name, complete, message }) {
-      next({ name, complete, message });
+notesRouter.post("/user/create_label", requireUser, async (req, res, next) => {
+  try {
+    const { label_name } = req.body;
+    const { id } = req.user;
+    const newLabel = await createLabel({
+      userId: id,
+      label_name: label_name,
+    });
+    if (!newLabel) {
+      next({
+        name: "LabelCreationError",
+        message: "Label does not exist",
+      });
+    } else {
+      res.send({ label: newLabel, success: true });
     }
+  } catch ({ name, complete, message }) {
+    next({ name, complete, message });
   }
-);
+});
 
 //PATCH Add Label To Note
-//PATCH "/api/notes/user/:noteId/add_label"
+//PATCH "/api/notes/user/add_label_to_note"
 
 notesRouter.patch(
-  "/user/:noteId/add_label",
+  "/user/add_label_to_note",
   requireUser,
   async (req, res, next) => {
     try {
-      const noteId = req.params.noteId;
-      const { labelId } = req.body;
-      const addedLabel = await addLabelToNote(noteId, labelId);
-      if (!addedLabel || !labelId) {
+      const { labelId, noteId } = req.body;
+      const addedLabel = await addLabelToNote(labelId, noteId);
+
+      const note = await getNoteById(noteId);
+      const items = await getItemsByNoteId(noteId);
+      const labels = await getLabelsByNoteId(noteId);
+      if (!addedLabel) {
         next({
           name: "LabelAddError",
           message: "Label does not exist",
         });
       } else {
-        res.send({ label: addedLabel, success: true });
+        res.send({
+          note: { ...note, items: items, labels: labels },
+          success: true,
+        });
       }
     } catch (error) {
       next(error);
@@ -516,27 +580,29 @@ notesRouter.patch(
 );
 
 //PATCH Remove Label From Note
-//PATCH "/api/notes/user/:noteId/remove_label"
+//PATCH "/api/notes/user/remove_label_from_note"
 
 notesRouter.patch(
-  "/user/:noteId/remove_label",
+  "/user/remove_label_from_note",
   requireUser,
   async (req, res, next) => {
     try {
-      const noteId = req.params.noteId;
-      const { labelId } = req.body;
-      const removedLabel = await removeLabelFromNote({
-        noteId,
-        labelId,
-      });
+      const { labelId, noteId } = req.body;
+      const removedLabel = await removeLabelFromNote(labelId, noteId);
+
+      const note = await getNoteById(noteId);
+      const items = await getItemsByNoteId(noteId);
+      const labels = await getLabelsByNoteId(noteId);
       if (!removedLabel) {
         next({
-          name,
-          complete: "LabelRemoveError",
+          name: "LabelRemoveError",
           message: "Label does not exist",
         });
       } else {
-        res.send({ label: removedLabel, success: true });
+        res.send({
+          note: { ...note, items: items, labels: labels },
+          success: true,
+        });
       }
     } catch (error) {
       next(error);
@@ -545,48 +611,50 @@ notesRouter.patch(
 );
 
 //Patch Edit Label
-//PATCH "/api/notes/user/:labelId/edit_label"
+//PATCH "/api/notes/user/edit_label"
 
-notesRouter.patch(
-  "/user/:labelId/edit_label",
-  requireUser,
-  async (req, res, next) => {
-    try {
-      const labelId = req.params.labelId;
-      const { label_name } = req.body;
-      const editedLabel = await editLabel(labelId, { label_name });
-      if (!editedLabel || !labelId) {
-        next({
-          name: "LabelEditError",
-          message: "Label does not exist",
-        });
-      } else {
-        res.send({ label: editedLabel, success: true });
-      }
-    } catch (error) {
-      next(error);
+notesRouter.patch("/user/edit_label", requireUser, async (req, res, next) => {
+  try {
+    const { labelId, label_name } = req.body;
+    const editedLabel = await editLabel(labelId, label_name);
+
+    if (!editedLabel) {
+      next({
+        name: "LabelEditError",
+        message: "Label does not exist",
+      });
+    } else {
+      res.send({
+        label: editedLabel,
+        success: true,
+      });
     }
+  } catch (error) {
+    next(error);
   }
-);
+});
 
 //DELETE Label
-//DELETE "/api/notes/user/:labelId/delete_label"
+//DELETE "/api/notes/user/delete_label"
 
 notesRouter.delete(
-  "/user/:labelId/delete_label",
+  "/user/delete_label",
   requireUser,
   async (req, res, next) => {
     try {
-      const labelId = req.params.labelId;
+      const { labelId } = req.body;
       const deletedLabel = await deleteLabel(labelId);
-      if (!deletedLabel || !labelId) {
+
+      if (!deletedLabel) {
         next({
-          name,
-          complete: "LabelDeleteError",
+          name: "LabelDeleteError",
           message: "Label does not exist",
         });
       } else {
-        res.send({ label: deletedLabel, success: true });
+        res.send({
+          label: deletedLabel,
+          success: true,
+        });
       }
     } catch (error) {
       next(error);

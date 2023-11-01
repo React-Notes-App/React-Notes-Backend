@@ -1,16 +1,17 @@
 const client = require("./client");
 
-const createItem = async ({ id, name }) => {
+const createItem = async ({ id, name, completed }) => {
   try {
+    console.log("Creating item", id, name);
     const {
       rows: [item],
     } = await client.query(
       `
-              INSERT INTO items( notes_Id, item_name)
-              VALUES($1, $2)
+              INSERT INTO items( notes_Id, item_name, completed)
+              VALUES($1, $2, $3)
               RETURNING *;
           `,
-      [id, name]
+      [id, name, completed]
     );
     console.log("Finished creating item", item);
     return item;
@@ -20,9 +21,9 @@ const createItem = async ({ id, name }) => {
   }
 };
 
-const editItemName = async (id, item_name) => {
+const editItemName = async ({ id, name }) => {
   try {
-    console.log("Updating item name", id, item_name);
+    console.log("Updating item name", id, name);
     const {
       rows: [item],
     } = await client.query(
@@ -32,7 +33,7 @@ const editItemName = async (id, item_name) => {
             WHERE id=$1
             RETURNING *;
         `,
-      [id, item_name]
+      [id, name]
     );
     console.log("Finished updating item", item);
     return item;
@@ -96,9 +97,9 @@ const getItemsByNoteId = async (noteId) => {
   }
 };
 
-const deleteItem = async (itemId) => {
+const deleteItem = async (id) => {
   try {
-    console.log("Deleting item", itemId);
+    console.log("Deleting item", id);
     const {
       rows: [item],
     } = await client.query(
@@ -107,7 +108,7 @@ const deleteItem = async (itemId) => {
               WHERE id=$1
               RETURNING *;
           `,
-      [itemId]
+      [id]
     );
     console.log("Finished deleting item", item);
     return item;

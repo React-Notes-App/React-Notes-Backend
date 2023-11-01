@@ -88,67 +88,75 @@ const itemsToAdd = [
 ];
 const labelsToAdd = [
   {
-    name: "Groceries",
+    userId: 1,
+    label_name: "Groceries",
   },
   {
-    name: "Work",
+    userId: 1,
+    label_name: "Work",
   },
   {
-    name: "Climbing",
+    userId: 1,
+    label_name: "Climbing",
   },
   {
-    name: "Home",
+    userId: 1,
+    label_name: "Home",
   },
   {
-    name: "Important",
+    userId: 2,
+    label_name: "Important",
   },
   {
-    name: "Mountain Biking",
+    userId: 2,
+    label_name: "Mountain Biking",
   },
   {
-    name: "School",
+    userId: 2,
+    label_name: "School",
   },
   {
-    name: "Chores",
+    userId: 2,
+    label_name: "Chores",
   },
 ];
 
 const notes_labelsToAdd = [
   {
-    noteId: 1,
     labelId: 1,
+    noteId: 1,
   },
   {
-    noteId: 1,
     labelId: 2,
+    noteId: 1,
   },
   {
-    noteId: 2,
     labelId: 3,
-  },
-  {
     noteId: 2,
+  },
+  {
     labelId: 4,
+    noteId: 2,
   },
   {
-    noteId: 3,
     labelId: 5,
-  },
-  {
     noteId: 3,
+  },
+  {
     labelId: 6,
+    noteId: 3,
   },
   {
-    noteId: 4,
     labelId: 7,
+    noteId: 4,
   },
   {
-    noteId: 4,
     labelId: 8,
+    noteId: 4,
   },
   {
-    noteId: 4,
     labelId: 1,
+    noteId: 4,
   },
 ];
 

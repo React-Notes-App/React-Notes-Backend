@@ -35,14 +35,19 @@ const {
   createLabel,
   getLabel,
   getAllLabels,
+  getLabelsByUser,
   updateLabel,
   deleteLabel,
-  getLabelsByUser,
+  // getLabelsByUser,
 
   //notes_labels exports
   createNotesLabels,
-  getNotesByLabelId,
+  getNotesLabelsByUser,
   getLabelsByNoteId,
+  getActiveLabelsByUser,
+  getArchivedNotesByUser,
+  archiveNote,
+  addLabelToNote,
 } = require("./index");
 
 const {
@@ -105,16 +110,19 @@ const createTables = async () => {
 
             CREATE TABLE labels(
                 id SERIAL PRIMARY KEY,
-                notes_Id INTEGER REFERENCES notes(id) ON DELETE CASCADE,
-                label_name VARCHAR(255) UNIQUE NOT NULL
+                label_name VARCHAR(255) UNIQUE NOT NULL,
+                users_id INTEGER REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
                 );
 
             CREATE TABLE notes_labels(
                 id SERIAL PRIMARY KEY,
-                notes_Id INTEGER REFERENCES notes(id) ON DELETE CASCADE,
-                labels_Id INTEGER REFERENCES labels(id) ON DELETE CASCADE,
+                notes_Id INTEGER REFERENCES notes(id) ON DELETE CASCADE ON UPDATE CASCADE,
+                labels_Id INTEGER REFERENCES labels(id) ON DELETE CASCADE ON UPDATE CASCADE,
                 UNIQUE(notes_Id, labels_Id)
                 );
+
+            ALTER TABLE notes_labels
+            ADD CONSTRAINT notes_labels_uniq UNIQUE (notes_Id, labels_Id);
             `);
 
     console.log("Finished building tables!");
@@ -217,16 +225,28 @@ const rebuildDB = async () => {
     await getAllNotes();
     await getNotesByUser(1);
     await editNoteTitle({ id: 1, title: "Shopping List" });
+    // await archiveNote(1);
+    await getArchivedNotesByUser(1);
 
     //item functions
     await getItemsByNoteId(1);
-    await editItemName(1, "Bread");
+    await editItemName({ id: 1, name: "Milk" });
     await getNotesByUser(1);
+    await createItem({ id: 1, name: "Eggs", completed: false });
     //label functions
     await getAllLabels();
-    await getNotesByLabel(1);
+    // await getNotesByLabel(2);
     await getLabelsByNoteId(1);
+    await addLabelToNote(4, 1);
+    await getNotesByUser(1);
+    // await deleteLabel(1);
+    // await getLabelsByUser(1);
+    // await getActiveLabelsByUser(1);
+    await createLabel({ label_name: "New Label", userId: 1 });
+    // await addLabelToNote(9, 1);
+    await getActiveLabelsByUser(1);
     await getLabelsByUser(1);
+    await getNotesLabelsByUser(1);
   } catch (error) {
     console.error("Error during rebuildDB");
     throw error;
