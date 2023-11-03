@@ -36,6 +36,7 @@ const {
   createNotesLabels,
   getNotesByLabel,
   getNotesLabelsByUser,
+  getLabelByName,
 } = require("../db");
 
 //GET All Notes  ***needs Admin***
@@ -108,7 +109,7 @@ notesRouter.get("/user/archived", requireUser, async (req, res, next) => {
 
 notesRouter.post("/user/create_note", requireUser, async (req, res, next) => {
   try {
-    const { title, name, color, label_name } = req.body;
+    const { title, name, color, label_name, labelId } = req.body;
     const { id } = req.user;
     const newNote = await createNote({
       userId: id,
@@ -122,20 +123,40 @@ notesRouter.post("/user/create_note", requireUser, async (req, res, next) => {
       name: name || "No Item",
       completed: false,
     });
+    if (label_name) {
+      const createdLabel = await createLabel({
+        userId: id,
+        label_name: label_name,
+      });
+      const addedLabel = await addLabelToNote(createdLabel.id, noteId);
 
-    const newLabel = await createLabel({
-      label_name: label_name || "No Label",
-    });
-    if (!newNote) {
-      next({
-        name: "NoteCreationError",
-        message: "Note does not exist",
-      });
-    } else {
-      res.send({
-        note: { ...newNote, items: [newItem], labels: [newLabel] },
-        success: true,
-      });
+      const labels = await getLabelsByNoteId(noteId);
+      if (!newNote) {
+        next({
+          name: "NoteCreationError",
+          message: "Note does not exist",
+        });
+      } else {
+        res.send({
+          note: { ...newNote, items: [newItem], labels: labels },
+          success: true,
+        });
+      }
+    }
+    if (labelId) {
+      const addedLabel = await addLabelToNote(labelId, noteId);
+      const labels = await getLabelsByNoteId(noteId);
+      if (!newNote) {
+        next({
+          name: "NoteCreationError",
+          message: "Note does not exist",
+        });
+      } else {
+        res.send({
+          note: { ...newNote, items: [newItem], labels: labels },
+          success: true,
+        });
+      }
     }
   } catch ({ name, complete, message }) {
     next({ name, complete, message });

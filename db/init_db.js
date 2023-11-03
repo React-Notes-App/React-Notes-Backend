@@ -237,7 +237,7 @@ const rebuildDB = async () => {
     await getAllLabels();
     // await getNotesByLabel(2);
     await getLabelsByNoteId(1);
-    await addLabelToNote(4, 1);
+    // await addLabelToNote(4, 1);
     await getNotesByUser(1);
     // await deleteLabel(1);
     // await getLabelsByUser(1);

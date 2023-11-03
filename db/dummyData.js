@@ -37,7 +37,7 @@ const notesToAdd = [
     date: new Date(),
   },
   {
-    userId: 3,
+    userId: 2,
     title: "Home",
     color: "yellow",
     date: new Date(),
@@ -156,7 +156,7 @@ const notes_labelsToAdd = [
   },
   {
     labelId: 1,
-    noteId: 4,
+    noteId: 2,
   },
 ];
 
