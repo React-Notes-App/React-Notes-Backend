@@ -77,7 +77,7 @@ const getUser = async ({ email, password }) => {
       rows: [user],
     } = await client.query(
       `
-                SELECT id, email, password, is_admin
+                SELECT *
                 FROM users
                 WHERE id=${userByEmail.id};
             `
@@ -86,7 +86,6 @@ const getUser = async ({ email, password }) => {
       console.log("Invalid credentials");
       return null;
     } else {
-      delete user.password;
       console.log("Finished getting user", user);
       return user;
     }
