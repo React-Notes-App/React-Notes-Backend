@@ -118,11 +118,14 @@ notesRouter.post("/user/create_note", requireUser, async (req, res, next) => {
     });
 
     const noteId = newNote.id;
-    const newItem = await createItem({
-      id: noteId,
-      name: name || "No Item",
-      completed: false,
-    });
+    if (name) {
+      const newItem = await createItem({
+        id: noteId,
+        name: name || "No Item",
+        completed: false,
+      });
+    }
+
     if (label_name) {
       const createdLabel = await createLabel({
         userId: id,
@@ -162,6 +165,68 @@ notesRouter.post("/user/create_note", requireUser, async (req, res, next) => {
     next({ name, complete, message });
   }
 });
+
+//Create Note Copy
+//POST "/api/notes/user/create_note_copy"
+
+notesRouter.post(
+  "/user/create_note_copy",
+  requireUser,
+  async (req, res, next) => {
+    try {
+      const { title, color, noteItems, itemsCompleted, labelIds } = req.body;
+      const { id } = req.user;
+      const copiedNote = await createNote({
+        userId: id,
+        title: title || "No Title",
+        color: color || "gray",
+      });
+
+      const noteId = copiedNote.id;
+
+      if (labelIds) {
+        for (let labelId of labelIds) {
+          const copiedLabel = await addLabelToNote(labelId, noteId);
+        }
+      }
+
+      if (noteItems) {
+        for (let noteItem of noteItems) {
+          const copiedItem = await createItem({
+            id: noteId,
+            name: noteItem || "No Item",
+            completed: false,
+          });
+        }
+
+        if (itemsCompleted) {
+          for (let itemCompleted of itemsCompleted) {
+            const editedItem = await editItemStatus(
+              itemCompleted.itemId,
+              itemCompleted.completed
+            );
+          }
+        }
+      }
+
+      const labels = await getLabelsByNoteId(noteId);
+      const items = await getItemsByNoteId(noteId);
+
+      if (!copiedNote) {
+        next({
+          name: "NoteCopyError",
+          message: "Note does not exist",
+        });
+      }
+      res.send({
+        note: { ...copiedNote, items: items, labels: labels },
+        success: true,
+      });
+    } catch ({ name, complete, message }) {
+      next({ name, complete, message });
+    }
+  }
+);
 
 //Edit Note Title
 //PATCH "/api/notes/user/edit_note"
