@@ -13,6 +13,8 @@ const {
   deleteNote,
   archiveNote,
   unarchiveNote,
+  hideNoteCheckboxes,
+  showNoteCheckboxes,
 
   //Items//
   getAllItems,
@@ -376,6 +378,68 @@ notesRouter.patch(
       } else {
         res.send({
           note: { ...unArchivedNote, items: items, labels: labels },
+          success: true,
+        });
+      }
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+//Hide Checkboxes
+//PATCH "/api/notes/user/hide_checkboxes"
+
+notesRouter.patch(
+  "/user/hide_checkboxes",
+  requireUser,
+  async (req, res, next) => {
+    try {
+      const { id } = req.body;
+      const editedNote = await hideNoteCheckboxes(id);
+
+      let noteId = editedNote.id;
+      const items = await getItemsByNoteId(noteId);
+      const labels = await getLabelsByNoteId(noteId);
+      if (!editedNote) {
+        next({
+          name: "NoteEditError",
+          message: "Note does not exist",
+        });
+      } else {
+        res.send({
+          note: { ...editedNote, items: items, labels: labels },
+          success: true,
+        });
+      }
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+//Show Checkboxes
+//PATCH "/api/notes/user/show_checkboxes"
+
+notesRouter.patch(
+  "/user/show_checkboxes",
+  requireUser,
+  async (req, res, next) => {
+    try {
+      const { id } = req.body;
+      const editedNote = await showNoteCheckboxes(id);
+
+      let noteId = editedNote.id;
+      const items = await getItemsByNoteId(noteId);
+      const labels = await getLabelsByNoteId(noteId);
+      if (!editedNote) {
+        next({
+          name: "NoteEditError",
+          message: "Note does not exist",
+        });
+      } else {
+        res.send({
+          note: { ...editedNote, items: items, labels: labels },
           success: true,
         });
       }

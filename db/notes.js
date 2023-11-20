@@ -240,6 +240,50 @@ const unarchiveNote = async (id) => {
   }
 };
 
+const hideNoteCheckboxes = async (id) => {
+  try {
+    console.log("Hiding note checkboxes:", id);
+    const {
+      rows: [note],
+    } = await client.query(
+      `
+            UPDATE notes
+            SET has_checklist = false
+            WHERE id=$1
+            RETURNING *;
+        `,
+      [id]
+    );
+    console.log("Finished hiding note checkboxes", note);
+    return note;
+  } catch (error) {
+    console.error("Error hiding note checkboxes");
+    throw error;
+  }
+};
+
+const showNoteCheckboxes = async (id) => {
+  try {
+    console.log("Showing note checkboxes:", id);
+    const {
+      rows: [note],
+    } = await client.query(
+      `
+            UPDATE notes
+            SET has_checklist = true
+            WHERE id=$1
+            RETURNING *;
+        `,
+      [id]
+    );
+    console.log("Finished showing note checkboxes", note);
+    return note;
+  } catch (error) {
+    console.error("Error showing note checkboxes");
+    throw error;
+  }
+};
+
 module.exports = {
   createNote,
   editNoteTitle,
@@ -251,4 +295,6 @@ module.exports = {
   deleteNote,
   archiveNote,
   unarchiveNote,
+  hideNoteCheckboxes,
+  showNoteCheckboxes,
 };

@@ -48,6 +48,7 @@ const {
   getArchivedNotesByUser,
   archiveNote,
   addLabelToNote,
+  hideNoteCheckboxes,
 } = require("./index");
 
 const {
@@ -98,7 +99,8 @@ const createTables = async () => {
                 title VARCHAR(255) NOT NULL,
                 color VARCHAR(255) DEFAULT 'gray',
                 date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                is_archived BOOLEAN DEFAULT false
+                is_archived BOOLEAN DEFAULT false,
+                has_checklist BOOLEAN DEFAULT true
                 );
                 
             CREATE TABLE items(
@@ -247,6 +249,7 @@ const rebuildDB = async () => {
     await getActiveLabelsByUser(1);
     await getLabelsByUser(1);
     await getNotesLabelsByUser(1);
+    // await hideNoteCheckboxes(3);
   } catch (error) {
     console.error("Error during rebuildDB");
     throw error;
