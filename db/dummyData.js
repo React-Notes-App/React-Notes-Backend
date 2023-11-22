@@ -4,16 +4,21 @@ const usersToAdd = [
     email: "John@mymail.com",
     password: "password",
     is_admin: true,
+    picture: "https://i.imgur.com/5r6lxhf.png",
   },
   {
     name: "Jane",
     email: "Jane@mymail.com",
     password: "password",
+    is_admin: false,
+    picture: "https://i.imgur.com/5r6lxhf.png",
   },
   {
     name: "Joe",
     email: "Joe@mymail.com",
     password: "password",
+    is_admin: false,
+    picture: "https://i.imgur.com/5r6lxhf.png",
   },
 ];
 

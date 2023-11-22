@@ -12,7 +12,9 @@ const morgan = require("morgan");
 server.use(morgan("dev"));
 
 // handle application/json requests
-server.use(express.json());
+const maxRequestBodySize = 52428800; // 50mb
+server.use(express.json({ limit: maxRequestBodySize }));
+server.use(express.urlencoded({ extended: true, limit: maxRequestBodySize }));
 
 // here's our API
 server.use("/api", require("./api"));

@@ -90,7 +90,8 @@ const createTables = async () => {
                 name VARCHAR(255) NOT NULL,
                 email VARCHAR(255) UNIQUE NOT NULL,
                 password VARCHAR(255) NOT NULL,
-                is_admin BOOLEAN DEFAULT false
+                is_admin BOOLEAN DEFAULT false,
+                picture VARCHAR(255)
             );
             
             CREATE TABLE notes(
@@ -250,8 +251,14 @@ const rebuildDB = async () => {
     await getLabelsByUser(1);
     await getNotesLabelsByUser(1);
     // await hideNoteCheckboxes(3);
+    await updateUser(1, {
+      name: "JJ",
+    });
+    await getUserByEmail("John@mymail.com");
+    await getAllUsers();
   } catch (error) {
     console.error("Error during rebuildDB");
+
     throw error;
   }
 };

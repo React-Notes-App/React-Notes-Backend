@@ -10,10 +10,12 @@ const {
   getUser,
   getUserByEmail,
   getUserById,
+  updateUser,
 } = require("../db");
 
 //user routes will go here
 
+//Register User
 //POST /api/users/register
 usersRouter.post("/register", async (req, res, next) => {
   const { name, email, password } = req.body;
@@ -45,6 +47,7 @@ usersRouter.post("/register", async (req, res, next) => {
         name,
         email,
         password,
+        picture,
       });
 
       if (!user) {
@@ -76,7 +79,9 @@ usersRouter.post("/register", async (req, res, next) => {
   }
 });
 
+//Login User
 //POST /api/users/login
+
 usersRouter.post("/login", async (req, res, next) => {
   const { email, password } = req.body;
 
@@ -153,6 +158,45 @@ usersRouter.get("/me", requireUser, async (req, res, next) => {
     next({
       name: "Error Getting User",
       message: "There was an error getting the user.",
+    });
+  }
+});
+
+//Update User Info
+//PATCH /api/users/update_user
+
+usersRouter.patch("/me/edit-info", requireUser, async (req, res, next) => {
+  const { id } = req.user;
+  const { name, email, password, picture } = req.body;
+
+  const fields = {};
+
+  if (name) {
+    fields.name = name;
+  }
+
+  if (email) {
+    fields.email = email;
+  }
+
+  if (password) {
+    fields.password = password;
+  }
+
+  if (picture) {
+    fields.picture = picture;
+  }
+  try {
+    const user = await updateUser(id, fields);
+
+    res.send({
+      success: true,
+      user: user,
+    });
+  } catch ({ name, message }) {
+    next({
+      name: "Error Updating User",
+      message: "There was an error updating the user.",
     });
   }
 });
