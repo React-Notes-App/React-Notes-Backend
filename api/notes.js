@@ -111,12 +111,25 @@ notesRouter.get("/user/archived", requireUser, async (req, res, next) => {
 
 notesRouter.post("/user/create_note", requireUser, async (req, res, next) => {
   try {
-    const { title, name, color, label_name, labelId } = req.body;
+    const {
+      title,
+      name,
+      color,
+      date,
+      is_archived,
+      has_checklist,
+      label_name,
+      labelId,
+    } = req.body;
     const { id } = req.user;
+
     const newNote = await createNote({
       userId: id,
       title: title || "No Title",
       color: color || "gray",
+      date: date,
+      is_archived: is_archived,
+      has_checklist: has_checklist,
     });
 
     const noteId = newNote.id;
@@ -127,13 +140,14 @@ notesRouter.post("/user/create_note", requireUser, async (req, res, next) => {
         completed: false,
       });
     }
+    const item = await getItemsByNoteId(noteId);
 
     if (label_name) {
       const createdLabel = await createLabel({
         userId: id,
         label_name: label_name,
       });
-      const addedLabel = await addLabelToNote(createdLabel.id, noteId);
+      const newLabel = await addLabelToNote(createdLabel.id, noteId);
 
       const labels = await getLabelsByNoteId(noteId);
       if (!newNote) {
@@ -143,7 +157,7 @@ notesRouter.post("/user/create_note", requireUser, async (req, res, next) => {
         });
       } else {
         res.send({
-          note: { ...newNote, items: [newItem], labels: labels },
+          note: { ...newNote, items: item, labels: labels },
           success: true,
         });
       }
@@ -158,7 +172,7 @@ notesRouter.post("/user/create_note", requireUser, async (req, res, next) => {
         });
       } else {
         res.send({
-          note: { ...newNote, items: [newItem], labels: labels },
+          note: { ...newNote, items: item, labels: labels },
           success: true,
         });
       }

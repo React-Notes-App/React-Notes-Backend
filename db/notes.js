@@ -2,17 +2,24 @@ const client = require("./client");
 const { getItemsByNoteId } = require("./items");
 const { getLabelsByNoteId } = require("./notes_labels");
 
-const createNote = async ({ userId, title, color }) => {
+const createNote = async ({
+  userId,
+  title,
+  color,
+  date,
+  is_archived,
+  has_checklist,
+}) => {
   try {
     const {
       rows: [note],
     } = await client.query(
       `
-            INSERT INTO notes( users_Id, title, color)
-            VALUES($1, $2, $3)
+            INSERT INTO notes( users_Id, title, color, date, is_archived, has_checklist)
+            VALUES($1, $2, $3, $4, $5, $6)
             RETURNING *;
         `,
-      [userId, title, color]
+      [userId, title, color, date, is_archived, has_checklist]
     );
     console.log("Finished creating note", note);
     return note;

@@ -47,7 +47,6 @@ usersRouter.post("/register", async (req, res, next) => {
         name,
         email,
         password,
-        picture,
       });
 
       if (!user) {

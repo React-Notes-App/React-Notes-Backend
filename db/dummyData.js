@@ -28,24 +28,32 @@ const notesToAdd = [
     title: "Groceries",
     color: "rgb(33, 150, 243)",
     date: new Date(),
+    is_archived: false,
+    has_checklist: true,
   },
   {
     userId: 1,
     title: "Work",
     color: "rgb(255, 193, 7)",
     date: new Date(),
+    is_archived: false,
+    has_checklist: true,
   },
   {
     userId: 2,
     title: "Climbing",
     color: "green",
     date: new Date(),
+    is_archived: false,
+    has_checklist: true,
   },
   {
     userId: 2,
     title: "Home",
     color: "yellow",
     date: new Date(),
+    is_archived: false,
+    has_checklist: true,
   },
 ];
 
