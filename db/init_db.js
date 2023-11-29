@@ -91,7 +91,7 @@ const createTables = async () => {
                 email VARCHAR(255) UNIQUE NOT NULL,
                 password VARCHAR(255) NOT NULL,
                 is_admin BOOLEAN DEFAULT false,
-                picture VARCHAR(255)
+                picture TEXT
             );
             
             CREATE TABLE notes(
@@ -235,7 +235,7 @@ const rebuildDB = async () => {
     await getItemsByNoteId(1);
     await editItemName({ id: 1, name: "Milk" });
     await getNotesByUser(1);
-    await createItem({ id: 1, name: "Eggs", completed: false });
+    await createItem({ id: 1, itemName: "Eggs", completed: false });
     //label functions
     await getAllLabels();
     // await getNotesByLabel(2);

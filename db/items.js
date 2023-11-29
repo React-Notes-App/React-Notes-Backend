@@ -1,8 +1,8 @@
 const client = require("./client");
 
-const createItem = async ({ id, name, completed }) => {
+const createItem = async ({ id, itemName, completed }) => {
   try {
-    console.log("Creating item", id, name);
+    console.log("Creating item", id, itemName);
     const {
       rows: [item],
     } = await client.query(
@@ -11,7 +11,7 @@ const createItem = async ({ id, name, completed }) => {
               VALUES($1, $2, $3)
               RETURNING *;
           `,
-      [id, name, completed]
+      [id, itemName, completed]
     );
     console.log("Finished creating item", item);
     return item;

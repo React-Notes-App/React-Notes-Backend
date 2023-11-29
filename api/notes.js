@@ -113,7 +113,7 @@ notesRouter.post("/user/create_note", requireUser, async (req, res, next) => {
   try {
     const {
       title,
-      name,
+      itemName,
       color,
       date,
       is_archived,
@@ -133,10 +133,10 @@ notesRouter.post("/user/create_note", requireUser, async (req, res, next) => {
     });
 
     const noteId = newNote.id;
-    if (name) {
+    if (itemName) {
       const newItem = await createItem({
         id: noteId,
-        name: name || "No Item",
+        itemName: itemName || "No Item",
         completed: false,
       });
     }
@@ -177,6 +177,27 @@ notesRouter.post("/user/create_note", requireUser, async (req, res, next) => {
         });
       }
     }
+
+    if (!labelId && !label_name) {
+      let noLabel = await createLabel({
+        userId: id,
+        label_name: "No Label",
+      });
+      const newLabel = await addLabelToNote(noLabel.id, noteId);
+      const label = await getLabelsByNoteId(noteId);
+
+      if (!newNote) {
+        next({
+          name: "NoteCreationError",
+          message: "Note does not exist",
+        });
+      } else {
+        res.send({
+          note: { ...newNote, items: item, labels: label },
+          success: true,
+        });
+      }
+    }
   } catch ({ name, complete, message }) {
     next({ name, complete, message });
   }
@@ -190,12 +211,25 @@ notesRouter.post(
   requireUser,
   async (req, res, next) => {
     try {
-      const { title, color, noteItems, itemsCompleted, labelIds } = req.body;
+      const {
+        title,
+        itemNames,
+        color,
+        date,
+        is_archived,
+        has_checklist,
+        itemsCompleted,
+        labelIds,
+      } = req.body;
+
       const { id } = req.user;
       const copiedNote = await createNote({
         userId: id,
         title: title || "No Title",
         color: color || "gray",
+        date: date,
+        is_archived: is_archived,
+        has_checklist: has_checklist,
       });
 
       const noteId = copiedNote.id;
@@ -206,11 +240,11 @@ notesRouter.post(
         }
       }
 
-      if (noteItems) {
-        for (let noteItem of noteItems) {
+      if (itemNames) {
+        for (let itemName of itemNames) {
           const copiedItem = await createItem({
             id: noteId,
-            name: noteItem || "No Item",
+            itemName: itemName || "No Item",
             completed: false,
           });
         }
@@ -487,10 +521,10 @@ notesRouter.get("/all_items", requireAdmin, async (req, res, next) => {
 
 notesRouter.post("/user/add_item", requireUser, async (req, res, next) => {
   try {
-    const { id, name } = req.body;
+    const { id, itemName } = req.body;
     const newItem = await createItem({
       id: id,
-      name: name,
+      itemName: itemName,
       completed: false,
     });
 

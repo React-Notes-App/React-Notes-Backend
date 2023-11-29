@@ -60,42 +60,42 @@ const notesToAdd = [
 const itemsToAdd = [
   {
     id: 1,
-    name: "Milk",
+    itemName: "Milk",
     completed: false,
   },
   {
     id: 1,
-    name: "Eggs",
+    itemName: "Eggs",
     completed: false,
   },
   {
     id: 2,
-    name: "Write Code",
+    itemName: "Write Code",
     completed: false,
   },
   {
     id: 2,
-    name: "Review Code",
+    itemName: "Review Code",
     completed: false,
   },
   {
     id: 3,
-    name: "5x3's",
+    itemName: "5x3's",
     completed: false,
   },
   {
     id: 3,
-    name: "Suicides",
+    itemName: "Suicides",
     completed: false,
   },
   {
     id: 4,
-    name: "Dishes",
+    itemName: "Dishes",
     completed: false,
   },
   {
     id: 4,
-    name: "Vacuum",
+    itemName: "Vacuum",
     completed: false,
   },
 ];

@@ -25,6 +25,11 @@ const createUser = async ({ name, email, password, is_admin, picture }) => {
 };
 
 const updateUser = async (id, fields = {}) => {
+  if (fields.password) {
+    const SALT_COUNT = 10;
+    fields.password = await bcrypt.hash(fields.password, SALT_COUNT);
+  }
+
   const setString = Object.keys(fields)
     .map((key, index) => `"${key}"=$${index + 1}`)
     .join(", ");
@@ -135,6 +140,26 @@ const getUserById = async (userId) => {
   }
 };
 
+const getUserPicture = async (userId) => {
+  try {
+    const {
+      rows: [user],
+    } = await client.query(
+      `
+                SELECT picture
+                FROM users
+                WHERE id=$1
+            `,
+      [userId]
+    );
+    console.log("Finished getting user picture", user);
+    return user;
+  } catch (error) {
+    console.error("Error getting user picture");
+    throw error;
+  }
+};
+
 module.exports = {
   createUser,
   getUser,
@@ -142,4 +167,5 @@ module.exports = {
   getUserById,
   getAllUsers,
   updateUser,
+  getUserPicture,
 };

@@ -200,4 +200,31 @@ usersRouter.patch("/me/edit-info", requireUser, async (req, res, next) => {
   }
 });
 
+//Delete User
+//DELETE /api/users/delete_user
+
+usersRouter.delete("/me/delete_user", requireUser, async (req, res, next) => {
+  try {
+    const user = await getUserById(req.user.id);
+
+    if (user) {
+      await deleteUser(req.user.id);
+      res.send({
+        success: true,
+        message: "User deleted",
+      });
+    } else {
+      next({
+        name: "Error Deleting User",
+        message: "There was an error deleting the user.",
+      });
+    }
+  } catch ({ name, message }) {
+    next({
+      name: "Error Deleting User",
+      message: "There was an error deleting the user.",
+    });
+  }
+});
+
 module.exports = usersRouter;
