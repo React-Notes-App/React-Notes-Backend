@@ -215,47 +215,48 @@ const rebuildDB = async () => {
     console.log("Notes_labels created:", addedNoteLabels);
 
     //user functions
-    await getAllUsers();
-    await getUserById(1);
-    await getUserByEmail("John@mymail.com");
-    await createUser({
-      name: "Tom",
-      email: "Tom@mymail.com",
-      password: "password",
-    });
+    // await getAllUsers();
+    // await getUserById(1);
+    // await getUserByEmail("John@mymail.com");
+    // await createUser({
+    //   name: "Tom",
+    //   email: "Tom@mymail.com",
+    //   password: "password",
+    // });
 
     //note functions
-    await getAllNotes();
-    await getNotesByUser(1);
-    await editNoteTitle({ id: 1, title: "Shopping List" });
-    // await archiveNote(1);
-    await getArchivedNotesByUser(1);
+    // await getAllNotes();
+    // await getNotesByUser(1);
+    // await editNoteTitle({ id: 1, title: "Shopping List" });
+    // // await archiveNote(1);
+    // await getArchivedNotesByUser(1);
 
     //item functions
-    await getItemsByNoteId(1);
-    await editItemName({ id: 1, name: "Milk" });
-    await getNotesByUser(1);
-    await createItem({ id: 1, itemName: "Eggs", completed: false });
+    // await getItemsByNoteId(1);
+    // await editItemName({ id: 1, name: "Milk" });
+    // await getNotesByUser(1);
+    // await createItem({ id: 1, itemName: "Bread", completed: false });
+
     //label functions
-    await getAllLabels();
+    // await getAllLabels();
     // await getNotesByLabel(2);
-    await getLabelsByNoteId(1);
+    // await getLabelsByNoteId(1);
     // await addLabelToNote(4, 1);
-    await getNotesByUser(1);
+    // await getNotesByUser(1);
     // await deleteLabel(1);
     // await getLabelsByUser(1);
     // await getActiveLabelsByUser(1);
-    await createLabel({ label_name: "New Label", userId: 1 });
+    // await createLabel({ label_name: "New Label", userId: 1 });
     // await addLabelToNote(9, 1);
-    await getActiveLabelsByUser(1);
-    await getLabelsByUser(1);
-    await getNotesLabelsByUser(1);
-    // await hideNoteCheckboxes(3);
-    await updateUser(1, {
-      name: "JJ",
-    });
-    await getUserByEmail("John@mymail.com");
-    await getAllUsers();
+    // await getActiveLabelsByUser(1);
+    // await getLabelsByUser(1);
+    // await getNotesLabelsByUser(1);
+    // // await hideNoteCheckboxes(3);
+    // await updateUser(1, {
+    //   name: "JJ",
+    // });
+    // await getUserByEmail("John@mymail.com");
+    // await getAllUsers();
   } catch (error) {
     console.error("Error during rebuildDB");
 
