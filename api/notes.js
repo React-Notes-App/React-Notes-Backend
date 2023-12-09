@@ -162,6 +162,7 @@ notesRouter.post("/user/create_note", requireUser, async (req, res, next) => {
         });
       }
     }
+
     if (labelId) {
       const addedLabel = await addLabelToNote(labelId, noteId);
       const labels = await getLabelsByNoteId(noteId);
