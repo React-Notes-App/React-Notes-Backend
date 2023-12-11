@@ -30,6 +30,7 @@ const notesToAdd = [
     date: new Date(),
     is_archived: false,
     has_checklist: true,
+    is_deleted: false,
   },
   {
     userId: 1,
@@ -38,6 +39,7 @@ const notesToAdd = [
     date: new Date(),
     is_archived: false,
     has_checklist: true,
+    is_deleted: false,
   },
   {
     userId: 2,
@@ -46,6 +48,7 @@ const notesToAdd = [
     date: new Date(),
     is_archived: false,
     has_checklist: true,
+    is_deleted: false,
   },
   {
     userId: 2,
@@ -54,6 +57,7 @@ const notesToAdd = [
     date: new Date(),
     is_archived: false,
     has_checklist: true,
+    is_deleted: false,
   },
 ];
 

@@ -10,7 +10,9 @@ const {
   createNote,
   editNoteTitle,
   editNoteColor,
-  deleteNote,
+  trashNote,
+  removeFromTrash,
+  deleteNotePerm,
   archiveNote,
   unarchiveNote,
   hideNoteCheckboxes,
@@ -118,6 +120,7 @@ notesRouter.post("/user/create_note", requireUser, async (req, res, next) => {
       date,
       is_archived,
       has_checklist,
+      is_deleted,
       label_name,
       labelId,
     } = req.body;
@@ -130,6 +133,7 @@ notesRouter.post("/user/create_note", requireUser, async (req, res, next) => {
       date: date,
       is_archived: is_archived,
       has_checklist: has_checklist,
+      is_deleted: is_deleted,
     });
 
     const noteId = newNote.id;
@@ -219,6 +223,7 @@ notesRouter.post(
         date,
         is_archived,
         has_checklist,
+        is_deleted,
         itemsCompleted,
         labelIds,
       } = req.body;
@@ -231,6 +236,7 @@ notesRouter.post(
         date: date,
         is_archived: is_archived,
         has_checklist: has_checklist,
+        is_deleted: is_deleted,
       });
 
       const noteId = copiedNote.id;
@@ -345,17 +351,16 @@ notesRouter.patch(
   }
 );
 
-//DELETE Note
-//DELETE "/api/notes/user/delete_note"
+//Trash Note
+//PATCH "/api/notes/user/trash_note"
 
-notesRouter.delete("/user/delete_note", requireUser, async (req, res, next) => {
+notesRouter.patch("/user/trash_note", requireUser, async (req, res, next) => {
   try {
     const { id } = req.body;
-    const deletedNote = await deleteNote(id);
+    const deletedNote = await trashNote(id);
 
     let noteId = deletedNote.id;
     const items = await getItemsByNoteId(noteId);
-
     const labels = await getLabelsByNoteId(noteId);
 
     if (!deletedNote) {
@@ -365,11 +370,7 @@ notesRouter.delete("/user/delete_note", requireUser, async (req, res, next) => {
       });
     } else {
       res.send({
-        note: {
-          ...deletedNote,
-          items: items,
-          labels: labels,
-        },
+        note: { ...deletedNote, items: items, labels: labels },
         success: true,
       });
     }
@@ -377,6 +378,75 @@ notesRouter.delete("/user/delete_note", requireUser, async (req, res, next) => {
     next(error);
   }
 });
+
+//Remove from Trash Note
+//PATCH "/api/notes/user/remove_from_trash"
+
+notesRouter.patch(
+  "/user/remove_from_trash",
+  requireUser,
+  async (req, res, next) => {
+    try {
+      const { id } = req.body;
+      const deletedNote = await removeFromTrash(id);
+
+      let noteId = deletedNote.id;
+      const items = await getItemsByNoteId(noteId);
+      const labels = await getLabelsByNoteId(noteId);
+
+      if (!deletedNote) {
+        next({
+          name: "NoteDeleteError",
+          message: "Note does not exist",
+        });
+      } else {
+        res.send({
+          note: { ...deletedNote, items: items, labels: labels },
+          success: true,
+        });
+      }
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+//DELETE Note
+//DELETE "/api/notes/user/delete_note_perm"
+
+notesRouter.delete(
+  "/user/delete_note_perm",
+  requireUser,
+  async (req, res, next) => {
+    try {
+      const { id } = req.body;
+      const deletedNote = await deleteNotePerm(id);
+
+      let noteId = deletedNote.id;
+      const items = await getItemsByNoteId(noteId);
+
+      const labels = await getLabelsByNoteId(noteId);
+
+      if (!deletedNote) {
+        next({
+          name: "NoteDeleteError",
+          message: "Note does not exist",
+        });
+      } else {
+        res.send({
+          note: {
+            ...deletedNote,
+            items: items,
+            labels: labels,
+          },
+          success: true,
+        });
+      }
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 
 //ARCHIVE Note
 //PATCH "/api/notes/user/archive"

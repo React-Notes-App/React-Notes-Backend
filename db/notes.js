@@ -9,17 +9,18 @@ const createNote = async ({
   date,
   is_archived,
   has_checklist,
+  is_deleted,
 }) => {
   try {
     const {
       rows: [note],
     } = await client.query(
       `
-            INSERT INTO notes( users_Id, title, color, date, is_archived, has_checklist)
-            VALUES($1, $2, $3, $4, $5, $6)
+            INSERT INTO notes( users_Id, title, color, date, is_archived, has_checklist, is_deleted)
+            VALUES($1, $2, $3, $4, $5, $6, $7)
             RETURNING *;
         `,
-      [userId, title, color, date, is_archived, has_checklist]
+      [userId, title, color, date, is_archived, has_checklist, is_deleted]
     );
     console.log("Finished creating note", note);
     return note;
@@ -182,7 +183,51 @@ const getArchivedNotesByUser = async (userId) => {
   }
 };
 
-const deleteNote = async (id) => {
+const trashNote = async (id) => {
+  try {
+    console.log("Trashing note", id);
+    const {
+      rows: [note],
+    } = await client.query(
+      `
+                UPDATE notes
+                SET is_deleted = true
+                WHERE id=$1
+                RETURNING *;
+            `,
+      [id]
+    );
+    console.log("Finished trashing note", note);
+    return note;
+  } catch (error) {
+    console.error("Error trashing note");
+    throw error;
+  }
+};
+
+const removeFromTrash = async (id) => {
+  try {
+    console.log("Removing note from trash", id);
+    const {
+      rows: [note],
+    } = await client.query(
+      `
+                UPDATE notes
+                SET is_deleted = false
+                WHERE id=$1
+                RETURNING *;
+            `,
+      [id]
+    );
+    console.log("Finished removing note from trash", note);
+    return note;
+  } catch (error) {
+    console.error("Error removing note from trash");
+    throw error;
+  }
+};
+
+const deleteNotePerm = async (id) => {
   try {
     console.log("Deleting note", id);
     const {
@@ -299,7 +344,9 @@ module.exports = {
   getNoteById,
   getArchivedNotesByUser,
   getAllNotes,
-  deleteNote,
+  trashNote,
+  removeFromTrash,
+  deleteNotePerm,
   archiveNote,
   unarchiveNote,
   hideNoteCheckboxes,

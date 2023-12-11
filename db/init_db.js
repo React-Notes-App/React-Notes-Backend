@@ -101,7 +101,8 @@ const createTables = async () => {
                 color VARCHAR(255) DEFAULT 'gray',
                 date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 is_archived BOOLEAN DEFAULT false,
-                has_checklist BOOLEAN DEFAULT true
+                has_checklist BOOLEAN DEFAULT true,
+                is_deleted BOOLEAN DEFAULT false
                 );
                 
             CREATE TABLE items(
