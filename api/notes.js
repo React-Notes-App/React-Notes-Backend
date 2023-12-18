@@ -182,17 +182,18 @@ notesRouter.post("/user/create_note", requireUser, async (req, res, next) => {
         });
       }
     }
+
     const existingLabels = await getLabelsByUser(id);
     const labelCheck = existingLabels.find(
       (label) => label.label_name === "No Label"
     );
     if (!labelId && !label_name && !labelCheck) {
-      let noLabel = await createLabel({
+      const noLabel = await createLabel({
         userId: id,
         label_name: "No Label",
       });
       const newLabel = await addLabelToNote(noLabel.id, noteId);
-      const label = await getLabelsByNoteId(noteId);
+      const labels = await getLabelsByNoteId(noteId);
 
       if (!newNote) {
         next({
@@ -201,7 +202,7 @@ notesRouter.post("/user/create_note", requireUser, async (req, res, next) => {
         });
       } else {
         res.send({
-          note: { ...newNote, items: item, labels: label },
+          note: { ...newNote, items: item, labels: labels },
           success: true,
         });
       }
@@ -209,7 +210,7 @@ notesRouter.post("/user/create_note", requireUser, async (req, res, next) => {
 
     if (!labelId && !label_name && labelCheck) {
       const newLabel = await addLabelToNote(labelCheck.id, noteId);
-      const label = await getLabelsByNoteId(noteId);
+      const labels = await getLabelsByNoteId(noteId);
 
       if (!newNote) {
         next({
@@ -218,7 +219,7 @@ notesRouter.post("/user/create_note", requireUser, async (req, res, next) => {
         });
       } else {
         res.send({
-          note: { ...newNote, items: item, labels: label },
+          note: { ...newNote, items: item, labels: labels },
           success: true,
         });
       }
