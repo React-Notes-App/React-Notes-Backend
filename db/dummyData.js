@@ -136,6 +136,11 @@ const labelsToAdd = [
     userId: 2,
     label_name: "Chores",
   },
+
+  {
+    userId: 2,
+    label_name: "Groceries",
+  },
 ];
 
 const notes_labelsToAdd = [

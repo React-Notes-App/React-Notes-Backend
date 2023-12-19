@@ -182,48 +182,6 @@ notesRouter.post("/user/create_note", requireUser, async (req, res, next) => {
         });
       }
     }
-
-    const existingLabels = await getLabelsByUser(id);
-    const labelCheck = existingLabels.find(
-      (label) => label.label_name === "No Label"
-    );
-    if (!labelId && !label_name && !labelCheck) {
-      const noLabel = await createLabel({
-        userId: id,
-        label_name: "No Label",
-      });
-      const newLabel = await addLabelToNote(noLabel.id, noteId);
-      const labels = await getLabelsByNoteId(noteId);
-
-      if (!newNote) {
-        next({
-          name: "NoteCreationError",
-          message: "Note does not exist",
-        });
-      } else {
-        res.send({
-          note: { ...newNote, items: item, labels: labels },
-          success: true,
-        });
-      }
-    }
-
-    if (!labelId && !label_name && labelCheck) {
-      const newLabel = await addLabelToNote(labelCheck.id, noteId);
-      const labels = await getLabelsByNoteId(noteId);
-
-      if (!newNote) {
-        next({
-          name: "NoteCreationError",
-          message: "Note does not exist",
-        });
-      } else {
-        res.send({
-          note: { ...newNote, items: item, labels: labels },
-          success: true,
-        });
-      }
-    }
   } catch ({ name, complete, message }) {
     next({ name, complete, message });
   }

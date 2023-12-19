@@ -114,8 +114,8 @@ const createTables = async () => {
 
             CREATE TABLE labels(
                 id SERIAL PRIMARY KEY,
-                label_name VARCHAR(255) UNIQUE NOT NULL,
-                users_id INTEGER REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
+                label_name VARCHAR(255) NOT NULL,
+                users_Id INTEGER REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
                 );
 
             CREATE TABLE notes_labels(
