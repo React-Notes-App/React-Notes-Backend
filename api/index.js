@@ -49,9 +49,11 @@ apiRouter.get("/health", (req, res, next) => {
 //place routers here
 const usersRouter = require("./users");
 const notesRouter = require("./notes");
+const emailsRouter = require("./email");
 
 apiRouter.use("/users", usersRouter);
 apiRouter.use("/notes", notesRouter);
+apiRouter.use("/email", emailsRouter);
 
 apiRouter.use((error, req, res, next) => {
   res.send({
