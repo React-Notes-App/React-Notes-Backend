@@ -200,6 +200,38 @@ usersRouter.patch("/me/edit-info", requireUser, async (req, res, next) => {
   }
 });
 
+//Update User Password (requires user email)
+//PATCH /api/users/update_password
+
+usersRouter.patch("/me/reset-password", async (req, res, next) => {
+  const { email, password } = req.body;
+
+  const fields = {};
+
+  if (password) {
+    fields.password = password;
+  }
+
+  const userEmail = await getUserByEmail(email);
+  const id = userEmail.id;
+
+  if (userEmail) {
+    try {
+      const user = await updateUser(id, fields);
+
+      res.send({
+        success: true,
+        user: user,
+      });
+    } catch ({ name, message }) {
+      next({
+        name: "Error Updating User",
+        message: "There was an error updating the user.",
+      });
+    }
+  }
+});
+
 //Delete User
 //DELETE /api/users/delete_user
 
