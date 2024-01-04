@@ -125,8 +125,8 @@ const createTables = async () => {
                 UNIQUE(notes_Id, labels_Id)
                 );
 
-            // ALTER TABLE notes_labels
-            // ADD CONSTRAINT notes_labels_uniq UNIQUE (notes_Id, labels_Id);
+            ALTER TABLE notes_labels
+            ADD CONSTRAINT notes_labels_uniq UNIQUE (notes_Id, labels_Id);
             `);
 
     console.log("Finished building tables!");
