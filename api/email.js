@@ -1,7 +1,6 @@
 const express = require("express");
 const emailRouter = express.Router();
 const nodemailer = require("nodemailer");
-const { requireUser } = require("./utils");
 const { EMAIL_PASSWORD, EMAIL_USER } = process.env;
 
 //handle email requests here
