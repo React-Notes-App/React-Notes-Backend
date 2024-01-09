@@ -112,7 +112,8 @@ const getNotesByUser = async (userId) => {
     let notesWithItemsAndLabels = await Promise.all(
       rows.map(async (note) => {
         let noteId = note.id;
-        note.items = await getItemsByNoteId(noteId);
+        let items = await getItemsByNoteId(noteId);
+        note.items = items.sort((a, b) => a.id - b.id);
         note.labels = await getLabelsByNoteId(noteId);
         return note;
       })

@@ -69,6 +69,7 @@ notesRouter.get("/user", requireUser, async (req, res, next) => {
   try {
     const id = req.user.id;
     const notes = await getNotesByUser(id);
+    const sortedNotes = notes.sort((a, b) => a.id - b.id);
     if (!notes) {
       next({
         name: "NoNotesError",
@@ -76,7 +77,7 @@ notesRouter.get("/user", requireUser, async (req, res, next) => {
       });
     } else {
       res.send({
-        notes: notes,
+        notes: sortedNotes,
         success: true,
       });
     }
@@ -582,6 +583,8 @@ notesRouter.post("/user/add_item", requireUser, async (req, res, next) => {
 
     let noteId = note.id;
     const items = await getItemsByNoteId(noteId);
+    const sortedItems = items.sort((a, b) => a.id - b.id);
+    console.log(sortedItems);
     const labels = await getLabelsByNoteId(noteId);
 
     if (!newItem) {
@@ -591,7 +594,7 @@ notesRouter.post("/user/add_item", requireUser, async (req, res, next) => {
       });
     } else {
       res.send({
-        note: { ...note, items: items, labels: labels },
+        note: { ...note, items: sortedItems, labels: labels },
         success: true,
       });
     }
@@ -613,6 +616,7 @@ notesRouter.patch("/user/edit_item", requireUser, async (req, res, next) => {
     });
 
     const items = await getItemsByNoteId(noteId);
+    const sortedItems = items.sort((a, b) => a.id - b.id);
     const note = await getNoteById(noteId);
     const labels = await getLabelsByNoteId(noteId);
 
@@ -623,7 +627,7 @@ notesRouter.patch("/user/edit_item", requireUser, async (req, res, next) => {
       });
     } else {
       res.send({
-        note: { ...note, items: items, labels: labels },
+        note: { ...note, items: sortedItems, labels: labels },
         success: true,
       });
     }
@@ -646,6 +650,7 @@ notesRouter.patch(
 
       const note = await getNoteById(noteId);
       const items = await getItemsByNoteId(noteId);
+      const sortedItems = items.sort((a, b) => a.id - b.id);
       const labels = await getLabelsByNoteId(noteId);
 
       if (!editedItem) {
@@ -655,7 +660,7 @@ notesRouter.patch(
         });
       } else {
         res.send({
-          note: { ...note, items: items, labels: labels },
+          note: { ...note, items: sortedItems, labels: labels },
           success: true,
         });
       }
@@ -675,6 +680,7 @@ notesRouter.delete("/user/delete_item", requireUser, async (req, res, next) => {
 
     const note = await getNoteById(noteId);
     const items = await getItemsByNoteId(noteId);
+    const sortedItems = items.sort((a, b) => a.id - b.id);
     const labels = await getLabelsByNoteId(noteId);
 
     if (!deletedItem) {
@@ -684,7 +690,7 @@ notesRouter.delete("/user/delete_item", requireUser, async (req, res, next) => {
       });
     } else {
       res.send({
-        note: { ...note, items: items, labels: labels },
+        note: { ...note, items: sortedItems, labels: labels },
         success: true,
       });
     }
