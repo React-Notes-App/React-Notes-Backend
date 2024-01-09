@@ -499,6 +499,7 @@ notesRouter.patch(
 
       let noteId = editedNote.id;
       const items = await getItemsByNoteId(noteId);
+      const sortedItems = items.sort((a, b) => a.id - b.id);
       const labels = await getLabelsByNoteId(noteId);
       if (!editedNote) {
         next({
@@ -507,7 +508,7 @@ notesRouter.patch(
         });
       } else {
         res.send({
-          note: { ...editedNote, items: items, labels: labels },
+          note: { ...editedNote, items: sortedItems, labels: labels },
           success: true,
         });
       }
@@ -530,6 +531,7 @@ notesRouter.patch(
 
       let noteId = editedNote.id;
       const items = await getItemsByNoteId(noteId);
+      const sortedItems = items.sort((a, b) => a.id - b.id);
       const labels = await getLabelsByNoteId(noteId);
       if (!editedNote) {
         next({
@@ -538,7 +540,7 @@ notesRouter.patch(
         });
       } else {
         res.send({
-          note: { ...editedNote, items: items, labels: labels },
+          note: { ...editedNote, items: sortedItems, labels: labels },
           success: true,
         });
       }
